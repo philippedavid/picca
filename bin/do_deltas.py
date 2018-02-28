@@ -125,6 +125,10 @@ if __name__ == '__main__':
     parser.add_argument('--use-constant-weight', action='store_true', default = False,
             help='set all the delta weights to one (implemented as eta = 0, sigma_lss = 1, fudge = 0)')
 
+    parser.add_argument('--smooth-ivar', type=int, default=None,
+            required=False, 
+            help='smooth the ivar by top-hat averaging over this number of pixels')
+
     args = parser.parse_args()
 
     ## init forest class

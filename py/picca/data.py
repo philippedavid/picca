@@ -72,6 +72,9 @@ class forest(qso):
     mean_reso = None
     mean_z = None
 
+    ## smooth ivar?
+    smooth_ivar = None
+
 
     def __init__(self,ll,fl,iv,thid,ra,dec,zqso,plate,mjd,fid,order,diff=None,reso=None):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
@@ -93,6 +96,14 @@ class forest(qso):
         if diff is not None :
             diff=diff[w]
             reso=reso[w]
+
+        if forest.smooth_ivar is not None:
+            A = sp.arange(len(ll))
+            A = abs(A-A[:,None])
+            w = A > forest.smooth_ivar//2
+            A[w]=0
+            A[~w]=1
+            iv = A.dot(iv)
 
         ## rebin
         cll = forest.lmin + sp.arange(bins.max()+1)*forest.dll
