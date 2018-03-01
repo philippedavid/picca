@@ -92,7 +92,7 @@ class forest(qso):
         iv=iv[w]
 
         ## construct rebin matrix
-        bins = (ll-forest.lmin)/forest.dll
+        bins = (ll-forest.lmin)/forest.dll+0.5
         bins = sp.floor(bins)
         ll_new = forest.lmin + bins*forest.dll
 
