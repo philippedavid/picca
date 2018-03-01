@@ -408,8 +408,8 @@ if __name__ == '__main__':
                     cols=[d.ll,d.de,d.iv,diff]
                     names=['LOGLAM','DELTA','IVAR','DIFF']
                 else :
-                    cols=[d.ll,d.de,d.we,d.co]
-                    names=['LOGLAM','DELTA','WEIGHT','CONT']
+                    cols=[d.ll,d.de,d.we,d.co,d.iv]
+                    names=['LOGLAM','DELTA','WEIGHT','CONT','IVAR']
 
                 out.write(cols,names=names,header=hd)
                 

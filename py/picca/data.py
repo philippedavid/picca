@@ -142,12 +142,9 @@ class forest(qso):
         self.fl = fl
         self.iv = iv
         self.order = order
-        #if diff is not None :
+
         self.diff = diff
         self.reso = reso
-#        else :
-#           self.diff = sp.zeros(len(ll))
-#           self.reso = sp.ones(len(ll))
 
         # compute means
         if reso is not None : self.mean_reso = sum(reso)/float(len(reso))
