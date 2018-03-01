@@ -93,10 +93,17 @@ class forest(qso):
 
         ## construct rebin matrix
         bins = (ll-forest.lmin)/forest.dll
-        bins = sp.floor(bins).astype(int)
+        bins = sp.floor(bins)
         ll_new = forest.lmin + bins*forest.dll
 
-        print(plate,mjd,fid)
+        w = (ll_new>forest.lmin) & (ll_new<forest.lmax)
+        w &= (ll_new-sp.log10(1+zqso)>forest.lmin_rest) 
+        w &= (ll_new-sp.log10(1+zqso)<forest.lmax_rest)
+        if w.sum()==0:
+            return
+
+        ll_new = ll_new[w]
+
         assert ll_new.min()-sp.log10(1+zqso)>forest.lmin_rest
         assert ll_new.max()-sp.log10(1+zqso)<forest.lmax_rest
 
