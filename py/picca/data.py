@@ -80,7 +80,7 @@ class forest(qso):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
         ## cut to the specified range
-        w = (ll>forest.lmin) & (ll<forest.lmax)
+        w = (ll>=forest.lmin) & (ll<forest.lmax)
         w &= (ll-sp.log10(1+zqso)>forest.lmin_rest) 
         w &= (ll-sp.log10(1+zqso)<forest.lmax_rest)
 
