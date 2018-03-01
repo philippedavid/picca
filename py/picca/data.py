@@ -98,11 +98,12 @@ class forest(qso):
             reso=reso[w]
 
         if forest.smooth_ivar is not None:
-            A = sp.arange(len(ll))
+            A = sp.arange(len(ll), dtype=float)
             A = abs(A-A[:,None])
             w = A > forest.smooth_ivar//2
             A[w]=0
             A[~w]=1
+            A/=A.sum(axis=1)[:,None]
             iv = A.dot(iv)
 
         ## rebin

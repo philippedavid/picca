@@ -141,6 +141,7 @@ if __name__ == '__main__':
     forest.dll = args.rebin*1e-4
     ## minumum dla transmission
     forest.dla_mask = args.dla_mask
+    forest.smooth_ivar = args.smooth_ivar
 
     ### Find the redshift range
     if (args.zqso_min is None):
