@@ -79,80 +79,71 @@ class forest(qso):
     def __init__(self,ll,fl,iv,thid,ra,dec,zqso,plate,mjd,fid,order,diff=None,reso=None):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
-        ## cut to specified range
-        bins = sp.floor((ll-forest.lmin)/forest.dll+0.5).astype(int)
-        ll = forest.lmin + bins*forest.dll
-        w = (ll>=forest.lmin)
-        w = w & (ll<forest.lmax)
-        w = w & (ll-sp.log10(1.+self.zqso)>forest.lmin_rest)
-        w = w & (ll-sp.log10(1.+self.zqso)<forest.lmax_rest)
-        w = w & (iv>0.)
+        ## cut to the specified range
+        w = (ll>forest.lmin) & (ll<forest.lmax)
+        w &= (ll-sp.log10(1+zqso)>forest.lmin_rest) 
+        w &= (ll-sp.log10(1+zqso)<forest.lmax_rest)
+
         if w.sum()==0:
             return
-        bins = bins[w]
-        ll = ll[w]
-        fl = fl[w]
-        iv = iv[w]
-        if diff is not None :
-            diff=diff[w]
-            reso=reso[w]
 
-        if forest.smooth_ivar is not None:
-            A = sp.arange(len(ll), dtype=float)
-            A = abs(A-A[:,None])
-            w = A > forest.smooth_ivar//2
-            A[w]=0
-            A[~w]=1
-            A/=A.sum(axis=1)[:,None]
-            iv = A.dot(iv)
+        ll=ll[w]
+        fl=fl[w]
+        iv=iv[w]
 
-        ## rebin
-        cll = forest.lmin + sp.arange(bins.max()+1)*forest.dll
-        cfl = sp.zeros(bins.max()+1)
-        civ = sp.zeros(bins.max()+1)
-        ccfl = sp.bincount(bins,weights=iv*fl)
-        cciv = sp.bincount(bins,weights=iv)
-        if diff is not None :
-            cdiff = sp.bincount(bins,weights=iv*diff)
-            creso = sp.bincount(bins,weights=iv*reso)
+        ## construct rebin matrix
+        nbins = int(sp.ceil((forest.lmax-forest.lmin)/forest.dll))
+        ll_new = forest.lmin + sp.arange(nbins)*forest.dll
 
-        cfl[:len(ccfl)] += ccfl
-        civ[:len(cciv)] += cciv
-        w = (civ>0.)
+        ## construct the rebinning matrix
+        A = ll-ll_new[:,None]
+        w = abs(A)>forest.dll/2
+        A[w]=0.
+        A[~w]=1.
+
+        ## normalize A such that the sum over columns is 1 for each row
+        norm=A.sum(axis=1)
+        w=norm==0
+        norm[w]=1.
+        A/=norm[:,None]
+
+        ## do rebinning
+        fl_new = A.dot(fl*iv)
+        iv_new = A.dot(iv)
+        w = iv_new>0
+
         if w.sum()==0:
             return
-        ll = cll[w]
-        fl = cfl[w]/civ[w]
-        iv = civ[w]
-        if diff is not None :
-            diff = cdiff[w]/civ[w]
-            reso = creso[w]/civ[w]
+        fl_new = fl_new[w]/iv_new[w]
+        iv_new = iv_new[w]
+        ll_new = ll_new[w]
 
         ## Flux calibration correction
         if not self.correc_flux is None:
-            correction = self.correc_flux(ll)
+            correction = self.correc_flux(ll_new)
             fl /= correction
             iv *= correction**2
         if not self.correc_ivar is None:
-            correction = self.correc_ivar(ll)
+            correction = self.correc_ivar(ll_new)
             iv /= correction
 
         self.T_dla = None
-        self.ll = ll
-        self.fl = fl
-        self.iv = iv
+        self.ll = ll_new
+        self.fl = fl_new
+        self.iv = iv_new
         self.order = order
 
         self.diff = diff
         self.reso = reso
 
         # compute means
-        if reso is not None : self.mean_reso = sum(reso)/float(len(reso))
-        err = 1.0/sp.sqrt(iv)
-        SNR = fl/err
+        if reso is not None : 
+            self.mean_reso = sum(reso)/float(len(reso))
+        err = 1.0/sp.sqrt(iv_new)
+        SNR = fl_new/err
         self.mean_SNR = sum(SNR)/float(len(SNR))
         lam_lya = constants.absorber_IGM["LYA"]
-        self.mean_z = (sp.power(10.,ll[len(ll)-1])+sp.power(10.,ll[0]))/2./lam_lya -1.0
+        self.mean_z = (sp.power(10.,ll_new[-1])+sp.power(10.,ll_new[0]))/2./lam_lya -1.0
 
 
     def __add__(self,d):
