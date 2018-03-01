@@ -92,20 +92,19 @@ class forest(qso):
         iv=iv[w]
 
         ## construct rebin matrix
-        nbins = int(sp.ceil((forest.lmax-forest.lmin)/forest.dll))
-        ll_new = forest.lmin + sp.arange(nbins)*forest.dll
+        bins = (ll-forest.lmin)/forest.dll
+        bins = sp.floor(bins).astype(int)
+        ll_new = forest.lmin + bins*forest.dll
+
+        print(plate,mjd,fid)
+        assert ll_new.min()-sp.log10(1+zqso)>forest.lmin_rest
+        assert ll_new.max()-sp.log10(1+zqso)<forest.lmax_rest
 
         ## construct the rebinning matrix
-        A = ll-ll_new[:,None]
-        w = abs(A)>forest.dll/2
+        A = abs(ll-ll_new[:,None])
+        w = A>forest.dll/2
         A[w]=0.
         A[~w]=1.
-
-        ## normalize A such that the sum over columns is 1 for each row
-        norm=A.sum(axis=1)
-        w=norm==0
-        norm[w]=1.
-        A/=norm[:,None]
 
         ## do rebinning
         fl_new = A.dot(fl*iv)
