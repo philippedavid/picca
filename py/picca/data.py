@@ -79,39 +79,27 @@ class forest(qso):
     def __init__(self,ll,fl,iv,thid,ra,dec,zqso,plate,mjd,fid,order,diff=None,reso=None):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
-        ## cut to the specified range
-        w = (ll>=forest.lmin) & (ll<forest.lmax)
-        w &= (ll-sp.log10(1+zqso)>forest.lmin_rest) 
-        w &= (ll-sp.log10(1+zqso)<forest.lmax_rest)
-
-        if w.sum()==0:
-            return
-
-        ll=ll[w]
-        fl=fl[w]
-        iv=iv[w]
-
-        ## construct rebin matrix
+        ## construct new wavelength grid
         bins = (ll-forest.lmin)/forest.dll+0.5
-        bins = sp.floor(bins)
+        bins = sp.floor(bins).astype(int)
         ll_new = forest.lmin + bins*forest.dll
 
-        w = (ll_new>forest.lmin) & (ll_new<forest.lmax)
+        w = (ll_new>=forest.lmin) & (ll_new<forest.lmax)
         w &= (ll_new-sp.log10(1+zqso)>forest.lmin_rest) 
         w &= (ll_new-sp.log10(1+zqso)<forest.lmax_rest)
         if w.sum()==0:
             return
-
-        ll_new = ll_new[w]
-
-        assert ll_new.min()-sp.log10(1+zqso)>forest.lmin_rest
-        assert ll_new.max()-sp.log10(1+zqso)<forest.lmax_rest
-
+        
+        ll_new = forest.lmin + sp.unique(bins[w])*forest.dll
+        ll=ll[w]
+        fl=fl[w]
+        iv=iv[w]
+        
         ## construct the rebinning matrix
-        A = abs(ll-ll_new[:,None])
-        w = A>forest.dll/2
-        A[w]=0.
-        A[~w]=1.
+        A = sp.exp(-(ll-ll_new[:,None])**2/forest.dll**2)
+#        w = A>forest.dll/2
+#        A[w]=0.
+#        A[~w]=1.
 
         ## do rebinning
         fl_new = A.dot(fl*iv)
