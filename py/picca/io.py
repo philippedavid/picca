@@ -416,10 +416,16 @@ def read_from_spcframe(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, mode
             flux = spcframe[0].read()
             ivar = spcframe[1].read()*(spcframe[2].read()==0)
             llam = spcframe[3].read()
+            fibermap = {f:i for i,f in enumerate(spcframe[5]['FIBERID'][:])}
             
             ## now convert all those fluxes into forest objects
             for index, (t, r, d, z, p, m, f) in enumerate(zip(thid[wfib], ra[wfib], dec[wfib], zqso[wfib], plate[wfib], mjd[wfib], fid[wfib])):
-                index =(f-1)%500
+                try:
+                    index = fibermap[f]
+                except:
+                    if log is not None:
+                        log.write('{} {} {} {} not found'.format(t,p,m,f))
+                        continue
                 d = forest(llam[index],flux[index],ivar[index], t, r, d, z, p, m, f, order)
                 if t in pix_data:
                     pix_data[t] += d
@@ -473,10 +479,16 @@ def read_from_spplate(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, log=N
             flux = h[0].read()
             ivar = h[1].read()*(h[2].read()==0)
             llam = coeff0 + coeff1*sp.arange(flux.shape[1])
+            fibermap = {f:i for i,f in enumerate(fid[wfib])}
             
             ## now convert all those fluxes into forest objects
             for (t, r, d, z, p, m, f) in zip(thid[wfib], ra[wfib], dec[wfib], zqso[wfib], plate[wfib], mjd[wfib], fid[wfib]):
-                index = f-1
+                try:
+                    index = fibermap[f]
+                except:
+                    if log is not None:
+                        log.write('{} {} {} {} not found'.format(t,p,m,f))
+                        continue
                 d = forest(llam,flux[index],ivar[index], t, r, d, z, p, m, f, order)
                 if t in pix_data:
                     pix_data[t] += d
