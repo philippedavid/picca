@@ -218,7 +218,7 @@ if __name__ == '__main__':
                         usr_mask_RF_DLA += [ [float(l[1]),float(l[2])] ]
                     else:
                         raise
-            f.closed
+            f.close()
             usr_mask_obs    = sp.log10(sp.asarray(usr_mask_obs))
             usr_mask_RF     = sp.log10(sp.asarray(usr_mask_RF))
             usr_mask_RF_DLA = sp.log10(sp.asarray(usr_mask_RF_DLA))
@@ -395,6 +395,7 @@ if __name__ == '__main__':
                 hd["MJD"]=d.mjd
                 hd["FIBERID"]=d.fid
                 hd["ORDER"]=d.order
+                hd['NSPEC'] = d.nspec
 
                 if (args.delta_format=='Pk1D') :
                     hd["MEANZ"]=d.mean_z
@@ -408,8 +409,8 @@ if __name__ == '__main__':
                     cols=[d.ll,d.de,d.iv,diff]
                     names=['LOGLAM','DELTA','IVAR','DIFF']
                 else :
-                    cols=[d.ll,d.de,d.we,d.co,d.iv]
-                    names=['LOGLAM','DELTA','WEIGHT','CONT','IVAR']
+                    cols=[d.ll,d.de,d.we,d.co,d.iv,d.fl]
+                    names=['LOGLAM','DELTA','WEIGHT','CONT','IVAR','FLUX']
 
                 out.write(cols,names=names,header=hd)
                 

@@ -96,10 +96,11 @@ class forest(qso):
         iv=iv[w]
         
         ## construct the rebinning matrix
-        A = sp.exp(-(ll-ll_new[:,None])**2/forest.dll**2)
-#        w = A>forest.dll/2
-#        A[w]=0.
-#        A[~w]=1.
+        A = abs(ll-ll_new[:,None])
+        w = A>3*forest.dll
+        A[w] = 0.
+        A[~w] = sp.exp(-A[~w]**2/2/forest.dll**2)
+        #A[~w] = 1.
 
         ## do rebinning
         fl_new = A.dot(fl*iv)
@@ -108,9 +109,13 @@ class forest(qso):
 
         if w.sum()==0:
             return
+
         fl_new = fl_new[w]/iv_new[w]
         iv_new = iv_new[w]
         ll_new = ll_new[w]
+
+        assert not sp.isnan(fl_new).any()
+        assert not sp.isnan(iv_new).any()
 
         ## Flux calibration correction
         if not self.correc_flux is None:
@@ -139,6 +144,9 @@ class forest(qso):
         lam_lya = constants.absorber_IGM["LYA"]
         self.mean_z = (sp.power(10.,ll_new[-1])+sp.power(10.,ll_new[0]))/2./lam_lya -1.0
 
+        ## keep track of how many spectra went into this object's flux:
+        self.nspec = 1
+
 
     def __add__(self,d):
 
@@ -162,6 +170,8 @@ class forest(qso):
         self.ll = cll[w]
         self.fl = cfl[w]/civ[w]
         self.iv = civ[w]
+
+        self.nspec += 1
 
         return self
 
@@ -241,7 +251,7 @@ class forest(qso):
             return v.sum()-sp.log(we).sum()
 
         p0 = (self.fl*self.iv).sum()/self.iv.sum()
-        p1 = 0
+        p1 = 0.
 
         mig = iminuit.Minuit(chi2,p0=p0,p1=p1,error_p0=p0/2.,error_p1=p0/2.,errordef=1.,print_level=0,fix_p1=(self.order==0))
         fmin,_ = mig.migrad()
@@ -267,7 +277,7 @@ class forest(qso):
 
 class delta(qso):
 
-    def __init__(self,thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,iv,diff,m_SNR,m_reso,m_z,dll):
+    def __init__(self,thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,iv,diff,m_SNR,m_reso,m_z,dll,fl=None, nspec = 1):
 
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
         self.ll = ll
@@ -281,6 +291,9 @@ class delta(qso):
         self.mean_reso = m_reso
         self.mean_z = m_z
         self.dll = dll
+        self.nspec = nspec
+        if fl is not None:
+            self.fl = fl
 
     @classmethod
     def from_forest(cls,f,st,var_lss,eta,fudge):
@@ -300,7 +313,7 @@ class delta(qso):
         iv = f.iv/(eta+(eta==0))*(co**2)*(mst**2)
 
         return cls(f.thid,f.ra,f.dec,f.zqso,f.plate,f.mjd,f.fid,ll,we,co,de,f.order,
-                   iv,diff,f.mean_SNR,f.mean_reso,f.mean_z,f.dll)
+                   iv,diff,f.mean_SNR,f.mean_reso,f.mean_z,f.dll, fl = f.fl, nspec = f.nspec)
 
 
     @classmethod
