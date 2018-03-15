@@ -479,7 +479,7 @@ def read_from_spplate(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, log=N
             flux = h[0].read()
             ivar = h[1].read()*(h[2].read()==0)
             llam = coeff0 + coeff1*sp.arange(flux.shape[1])
-            fibermap = {f:i for i,f in enumerate(fid[wfib])}
+            fibermap = {f:i for i,f in enumerate(h[5]['FIBERID'][:])}
             
             ## now convert all those fluxes into forest objects
             for (t, r, d, z, p, m, f) in zip(thid[wfib], ra[wfib], dec[wfib], zqso[wfib], plate[wfib], mjd[wfib], fid[wfib]):

@@ -80,7 +80,7 @@ class forest(qso):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
         ## construct new wavelength grid
-        bins = (ll-forest.lmin)/forest.dll+0.5
+        bins = (ll-forest.lmin)/forest.dll
         bins = sp.floor(bins).astype(int)
         ll_new = forest.lmin + bins*forest.dll
 
@@ -91,16 +91,16 @@ class forest(qso):
             return
         
         ll_new = forest.lmin + sp.unique(bins[w])*forest.dll
+        
         ll=ll[w]
         fl=fl[w]
         iv=iv[w]
         
         ## construct the rebinning matrix
         A = abs(ll-ll_new[:,None])
-        w = A>3*forest.dll
+        w = 3*A>forest.dll
         A[w] = 0.
         A[~w] = sp.exp(-A[~w]**2/2/forest.dll**2)
-        #A[~w] = 1.
 
         ## do rebinning
         fl_new = A.dot(fl*iv)
@@ -120,11 +120,11 @@ class forest(qso):
         ## Flux calibration correction
         if not self.correc_flux is None:
             correction = self.correc_flux(ll_new)
-            fl /= correction
-            iv *= correction**2
+            fl_new /= correction
+            iv_new *= correction**2
         if not self.correc_ivar is None:
             correction = self.correc_ivar(ll_new)
-            iv /= correction
+            iv_new /= correction
 
         self.T_dla = None
         self.ll = ll_new

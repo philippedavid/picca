@@ -266,7 +266,7 @@ if __name__ == '__main__':
                 continue
             
             l.append(d)
-            log.write("{} accepted\n".format(d.thid))
+            log.write("{} {} {} {} accepted\n".format(d.thid,d.plate,d.mjd,d.fid))
         data[p][:] = l
         if len(data[p])==0:
             del data[p]
@@ -274,6 +274,12 @@ if __name__ == '__main__':
     for p in data:
         for d in data[p]:
             assert hasattr(d,'ll')
+
+    for p in data:
+        h=fitsio.FITS(args.out_dir+'/forest-{}.fits'.format(p),'rw',clobber=True)
+        for d in data[p]:
+            h.write([d.ll,d.fl], names=['LOGLAM','FLUX'])
+        h.close()
 
     for it in range(nit):
         pool = Pool(processes=args.nproc)
