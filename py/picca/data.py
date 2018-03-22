@@ -140,7 +140,7 @@ class forest(qso):
         fl = sp.concatenate([self.fl, d.fl])
         iv = sp.concatenate([self.iv, d.iv])
 
-        bins = ((ll-forest.lmin)/forest.dll+0.5).astype(int)
+        bins = floor((ll-forest.lmin)/forest.dll+0.5).astype(int)
         fl_new = sp.bincount(bins, weights=fl*iv)
         iv_new = sp.bincount(bins, weights=iv)
         ll_new = sp.bincount(bins, weights=ll)
