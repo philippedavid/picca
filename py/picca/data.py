@@ -5,6 +5,7 @@ import iminuit
 from .dla import dla
 import fitsio
 import sys
+from scipy.interpolate import interp1d
 
 def variance(var,eta,var_lss,fudge):
     return eta*var + var_lss + fudge/var
@@ -80,56 +81,39 @@ class forest(qso):
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
         ## construct new wavelength grid
-        bins = (ll-forest.lmin)/forest.dll
-        bins = sp.floor(bins).astype(int)
-        ll_new = forest.lmin + bins*forest.dll
-
-        w = (ll_new>=forest.lmin) & (ll_new<forest.lmax)
-        w &= (ll_new-sp.log10(1+zqso)>forest.lmin_rest) 
-        w &= (ll_new-sp.log10(1+zqso)<forest.lmax_rest)
-        if w.sum()==0:
-            return
-        
-        ll_new = forest.lmin + sp.unique(bins[w])*forest.dll
-        
-        ll=ll[w]
-        fl=fl[w]
-        iv=iv[w]
-        
-        ## construct the rebinning matrix
-        A = abs(ll-ll_new[:,None])
-        w = 3*A>forest.dll
-        A[w] = 0.
-        A[~w] = sp.exp(-A[~w]**2/2/forest.dll**2)
-
-        ## do rebinning
-        fl_new = A.dot(fl*iv)
-        iv_new = A.dot(iv)
-        w = iv_new>0
-
+        w = iv>0
+        w &= (ll>=forest.lmin) & (ll<forest.lmax)
+        w &= (ll-sp.log10(1+zqso)>forest.lmin_rest) 
+        w &= (ll-sp.log10(1+zqso)<forest.lmax_rest)
         if w.sum()==0:
             return
 
-        fl_new = fl_new[w]/iv_new[w]
-        iv_new = iv_new[w]
-        ll_new = ll_new[w]
+        ll = ll[w]
+        fl = fl[w]
+        iv = iv[w]
+        
+        if reso is not None:
+            reso = reso[w]
+        if diff is not None:
+            diff = diff[w]
+       
 
-        assert not sp.isnan(fl_new).any()
-        assert not sp.isnan(iv_new).any()
+        assert not sp.isnan(fl).any()
+        assert not sp.isnan(iv).any()
 
         ## Flux calibration correction
         if not self.correc_flux is None:
-            correction = self.correc_flux(ll_new)
-            fl_new /= correction
-            iv_new *= correction**2
+            correction = self.correc_flux(ll)
+            fl /= correction
+            iv *= correction**2
         if not self.correc_ivar is None:
-            correction = self.correc_ivar(ll_new)
-            iv_new /= correction
+            correction = self.correc_ivar(ll)
+            iv /= correction
 
         self.T_dla = None
-        self.ll = ll_new
-        self.fl = fl_new
-        self.iv = iv_new
+        self.ll = ll
+        self.fl = fl
+        self.iv = iv
         self.order = order
 
         self.diff = diff
@@ -137,39 +121,44 @@ class forest(qso):
 
         # compute means
         if reso is not None : 
-            self.mean_reso = sum(reso)/float(len(reso))
-        err = 1.0/sp.sqrt(iv_new)
-        SNR = fl_new/err
-        self.mean_SNR = sum(SNR)/float(len(SNR))
-        lam_lya = constants.absorber_IGM["LYA"]
-        self.mean_z = (sp.power(10.,ll_new[-1])+sp.power(10.,ll_new[0]))/2./lam_lya -1.0
+            self.mean_reso = reso.mean()
+        SNR = fl*sp.sqrt(iv)
+        self.mean_SNR = SNR.mean()
+        z = 10**ll/constants.absorber_IGM["LYA"]-1
+        self.mean_z = (z[-1]+z[0])/2
 
-        ## keep track of how many spectra went into this object's flux:
+        ## keep track of how many exposures/observations 
+        ## went into this object's flux:
         self.nspec = 1
-
 
     def __add__(self,d):
 
         if not hasattr(self,'ll') or not hasattr(d,'ll'):
             return self
 
-        ll = sp.append(self.ll,d.ll)
-        fl = sp.append(self.fl,d.fl)
-        iv = sp.append(self.iv,d.iv)
+        ll = sp.concatenate([self.ll, d.ll])
+        fl = sp.concatenate([self.fl, d.fl])
+        iv = sp.concatenate([self.iv, d.iv])
 
-        bins = sp.floor((ll-forest.lmin)/forest.dll+0.5).astype(int)
-        cll = forest.lmin + sp.arange(bins.max()+1)*forest.dll
-        cfl = sp.zeros(bins.max()+1)
-        civ = sp.zeros(bins.max()+1)
-        ccfl = sp.bincount(bins,weights=iv*fl)
-        cciv = sp.bincount(bins,weights=iv)
-        cfl[:len(ccfl)] += ccfl
-        civ[:len(cciv)] += cciv
-        w = (civ>0.)
+        bins = ((ll-forest.lmin)/forest.dll+0.5).astype(int)
+        fl_new = sp.bincount(bins, weights=fl*iv)
+        iv_new = sp.bincount(bins, weights=iv)
+        ll_new = sp.bincount(bins, weights=ll)
+        n = sp.bincount(bins)
 
-        self.ll = cll[w]
-        self.fl = cfl[w]/civ[w]
-        self.iv = civ[w]
+        w = (n>0) & (iv_new>0)
+        ll_new = ll_new[w]/n[w]
+        
+        w=iv_new>0
+        fl_new = fl_new[w]/iv_new[w]
+        iv_new = iv_new[w]
+
+        self.fl = fl_new
+        self.iv = iv_new
+        self.ll = ll_new
+
+        assert len(self.fl) == len(self.ll)
+        assert len(self.iv) == len(self.ll)
 
         self.nspec += 1
 

@@ -129,6 +129,9 @@ if __name__ == '__main__':
             required=False, 
             help='smooth the ivar by top-hat averaging over this number of pixels')
 
+    parser.add_argument('--resampler', type=str, default='tophat_resampler',
+            help='resampler function to resample to a common wavelength grid')
+
     args = parser.parse_args()
 
     ## init forest class
@@ -191,10 +194,14 @@ if __name__ == '__main__':
 
     log = open(args.log,'w')
 
-    data,ndata,healpy_nside,healpy_pix_ordering = io.read_data(args.in_dir, args.drq, args.mode,\
-        zmin=args.zqso_min, zmax=args.zqso_max, nspec=args.nspec, log=log,\
-        keep_bal=args.keep_bal, bi_max=args.bi_max, order=args.order,\
-        best_obs=args.best_obs, single_exp=args.single_exp, pk1d=args.delta_format )
+    data, ndata, healpy_nside, healpy_pix_ordering = io.read_data(args.in_dir, 
+            args.drq, args.mode,
+            zmin=args.zqso_min, zmax=args.zqso_max, 
+            nspec=args.nspec, log=log,
+            keep_bal=args.keep_bal, bi_max=args.bi_max, 
+            order=args.order, best_obs=args.best_obs, 
+            single_exp=args.single_exp, pk1d=args.delta_format,
+            resampler=args.resampler)
    
     ### Get the lines to veto
     usr_mask_obs    = None
@@ -274,12 +281,6 @@ if __name__ == '__main__':
     for p in data:
         for d in data[p]:
             assert hasattr(d,'ll')
-
-    for p in data:
-        h=fitsio.FITS(args.out_dir+'/forest-{}.fits'.format(p),'rw',clobber=True)
-        for d in data[p]:
-            h.write([d.ll,d.fl], names=['LOGLAM','FLUX'])
-        h.close()
 
     for it in range(nit):
         pool = Pool(processes=args.nproc)

@@ -29,7 +29,7 @@ def mc(data):
     return ll,mcont,wcont
 
 def var_lss(data,eta_lim=(0.5,1.5),vlss_lim=(0.,0.3)):
-    nlss = 20
+    nlss = 10
     eta = sp.zeros(nlss)
     vlss = sp.zeros(nlss)
     fudge = sp.zeros(nlss)
@@ -39,7 +39,7 @@ def var_lss(data,eta_lim=(0.5,1.5),vlss_lim=(0.,0.3)):
     nb_pixels = sp.zeros(nlss)
     ll = forest.lmin + (sp.arange(nlss)+.5)*(forest.lmax-forest.lmin)/nlss
 
-    nwe = 100
+    nwe = 50
     vpmin = sp.log10(1e-5)
     vpmax = sp.log10(2.)
     var = 10**(vpmin + (sp.arange(nwe)+.5)*(vpmax-vpmin)/nwe)
@@ -96,7 +96,7 @@ def var_lss(data,eta_lim=(0.5,1.5),vlss_lim=(0.,0.3)):
             v = var_del[i*nwe:(i+1)*nwe]-variance(var,eta,vlss,fudge*fudge_ref)
             dv2 = var2_del[i*nwe:(i+1)*nwe]
             n = count[i*nwe:(i+1)*nwe]
-            w=nqso[i*nwe:(i+1)*nwe]>100
+            w=nqso[i*nwe:(i+1)*nwe]>10
             return sp.sum(v[w]**2/dv2[w])
         mig = iminuit.Minuit(chi2,forced_parameters=("eta","vlss","fudge"),eta=1.,vlss=0.1,fudge=1.,error_eta=0.05,error_vlss=0.05,error_fudge=0.05,errordef=1.,print_level=0,limit_eta=eta_lim,limit_vlss=vlss_lim, limit_fudge=(0,None))
         mig.migrad()

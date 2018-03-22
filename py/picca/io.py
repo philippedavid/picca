@@ -7,6 +7,8 @@ import sys
 import time
 import os.path
 
+from . import resamplers
+
 from picca.data import forest
 from picca.data import delta
 from picca.data import qso
@@ -113,7 +115,7 @@ def read_drq(drq,zmin,zmax,keep_bal,bi_max=None):
 target_mobj = 500
 nside_min = 8
 
-def read_data(in_dir,drq,mode,zmin = 2.1,zmax = 3.5,nspec=None,log=None,keep_bal=False,bi_max=None,order=1, best_obs=False, single_exp=False, pk1d=None):
+def read_data(in_dir,drq,mode,zmin = 2.1,zmax = 3.5,nspec=None,log=None,keep_bal=False,bi_max=None,order=1, best_obs=False, single_exp=False, pk1d=None, resampler=None):
 
     sys.stderr.write("mode: "+mode)
     ra,dec,zqso,thid,plate,mjd,fid = read_drq(drq,zmin,zmax,keep_bal,bi_max=bi_max)
@@ -173,7 +175,7 @@ def read_data(in_dir,drq,mode,zmin = 2.1,zmax = 3.5,nspec=None,log=None,keep_bal
     ndata = 0
 
     if mode=="spcframe":
-        pix_data = read_from_spcframe(in_dir,thid, ra, dec, zqso, plate, mjd, fid, order, mode=mode, log=log, best_obs=best_obs, single_exp=single_exp)
+        pix_data = read_from_spcframe(in_dir,thid, ra, dec, zqso, plate, mjd, fid, order, mode=mode, log=log, best_obs=best_obs, single_exp=single_exp,resampler=resampler)
         ra = [d.ra for d in pix_data]
         ra = sp.array(ra)
         dec = [d.dec for d in pix_data]
@@ -336,7 +338,7 @@ def read_from_pix(in_dir,pix,thid,ra,dec,zqso,plate,mjd,fid,order,log=None):
         h.close()
         return pix_data
 
-def read_from_spcframe(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, mode=None, log=None, best_obs=False, single_exp = False):
+def read_from_spcframe(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, mode=None, log=None, best_obs=False, single_exp = False, resampler=None):
     pix_data={}
     plates = sp.unique(plate)
     print("reading {} plates".format(len(plates)))
@@ -416,6 +418,7 @@ def read_from_spcframe(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, mode
             flux = spcframe[0].read()
             ivar = spcframe[1].read()*(spcframe[2].read()==0)
             llam = spcframe[3].read()
+            wdisp = spcframe[4].read()
             fibermap = {f:i for i,f in enumerate(spcframe[5]['FIBERID'][:])}
             
             ## now convert all those fluxes into forest objects
@@ -426,16 +429,20 @@ def read_from_spcframe(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, mode
                     if log is not None:
                         log.write('{} {} {} {} not found'.format(t,p,m,f))
                         continue
-                d = forest(llam[index],flux[index],ivar[index], t, r, d, z, p, m, f, order)
-                if t in pix_data:
-                    pix_data[t] += d
-                else:
-                    pix_data[t] = d
+                d = forest(llam[index],flux[index],ivar[index], t, r, d, z, p, m, f, order, reso=wdisp[index])
+                if hasattr(d, 'll') and len(d.ll)>2:
+                    if t in pix_data:
+                        pix_data[t].append(d)
+                    else:
+                        pix_data[t] = [d]
+
                 if log is not None:
                     log.write("{} read from exp {} and mjd {}\n".format(t, exp, m))
 
             print("INFO: read {} from {} in {} per spec. Progress: {} of {} \n".format(wfib.sum(), exp, (time.time()-t0)/(wfib.sum()+1e-3), len(pix_data), len(thid)))
             spcframe.close()
+
+    pix_data = getattr(resamplers,resampler)(pix_data, forest.lmin, forest.lmax, forest.lmin_rest, forest.lmax_rest,forest.dll)
 
     data = list(pix_data.values())
     return data
@@ -651,3 +658,4 @@ def read_objects(drq,nside,zmin,zmax,alpha,zref,cosmo,keep_bal=True):
     sys.stderr.write("\n")
 
     return objs,zqso.min()
+
