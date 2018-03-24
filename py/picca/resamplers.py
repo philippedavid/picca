@@ -34,6 +34,41 @@ def tophat_resampler(pix_data, llmin, llmax, llmin_rest, llmax_rest, dll):
 
     return pix_data
 
+def gaussian_resampler(pix_data, llmin, llmax, llmin_rest, llmax_rest, dll):
+
+    print('DLL: {}'.format(dll))
+    ll_new = sp.arange(llmin, llmax, dll)
+
+    count=0
+    for t,d_list in pix_data.items():
+        print('\rresampling {}%'.format(round(count/len(pix_data)*100,3)), end='')
+        count+=1
+        for d in d_list:
+            ## resample matrix:
+            A = abs(d.ll-ll_new[:,None])/dll
+            ## set to zero above 5 sigma
+            w = A>5
+            A[w]=0
+            A[~w] = sp.exp(-A[~w]**2/2)
+            fl_new = A.dot(d.fl*d.iv)
+            iv_new = A.dot(d.iv)
+
+            ll_new_rest = ll_new - sp.log10(1+d.zqso)
+            w = iv_new > 0
+            w &= (ll_new_rest>llmin_rest) & (ll_new_rest<llmax_rest)
+
+            fl_new = fl_new[w]
+            iv_new = iv_new[w]
+            fl_new /= iv_new
+
+            d.fl = fl_new
+            d.iv = iv_new
+            d.ll = ll_new[w]
+
+        pix_data[t] = coadd(d_list)
+
+    return pix_data
+
 def spectro_perf_resampler(pix_data, llmin, llmax, llmin_rest, llmax_rest, dll):
     ll_new = sp.arange(llmin, llmax, dll)
     nbins = len(ll_new)
@@ -104,7 +139,7 @@ def coadd(data_list):
     '''
 
     d0 = data_list[0]
-    for d1 in data_list:
+    for d1 in data_list[1:]:
         d0 += d1
 
     return d0
