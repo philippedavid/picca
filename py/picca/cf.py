@@ -45,7 +45,7 @@ def fill_neighs(pix):
         for d1 in data[ipix]:
             npix = query_disc(nside,[d1.xcart,d1.ycart,d1.zcart],angmax,inclusive = True)
             npix = [p for p in npix if p in data]
-            neighs = [d for p in npix for d in data[p]]
+            neighs = [d for p in npix for d in data[p] if d1.thid != d.thid]
             ang = d1^neighs
             w = ang<angmax
             neighs = sp.array(neighs)[w]
@@ -56,11 +56,11 @@ def fill_neighs_x_correlation(pix):
         for d1 in data[ipix]:
             npix = query_disc(nside,[d1.xcart,d1.ycart,d1.zcart],angmax,inclusive = True)
             npix = [p for p in npix if p in data2]
-            neighs = [d for p in npix for d in data2[p]]
+            neighs = [d for p in npix for d in data2[p] if d1.thid != d.thid]
             ang = d1^neighs
             w = (ang<angmax)
             neighs = sp.array(neighs)[w]
-            d1.neighs = [d for d in neighs if d1.thid != d.thid and (10**(d.ll[-1]- sp.log10(lambda_abs2)) + 10**(d1.ll[-1] - sp.log10(lambda_abs)))/2. >= z_cut_min+1 and (10**(d.ll[-1]- sp.log10(lambda_abs2)) + 10**(d1.ll[-1] - sp.log10(lambda_abs)))/2. < z_cut_max+1 ]
+            d1.neighs = [d for d in neighs if (10**(d.ll[-1]- sp.log10(lambda_abs2)) + 10**(d1.ll[-1] - sp.log10(lambda_abs)))/2. >= z_cut_min+1 and (10**(d.ll[-1]- sp.log10(lambda_abs2)) + 10**(d1.ll[-1] - sp.log10(lambda_abs)))/2. < z_cut_max+1 ]
 
 def cf(pix):
     xi = sp.zeros(np*nt)
@@ -287,7 +287,6 @@ def metal_dmat(pix,abs_igm1="LYA",abs_igm2="SiIII(1207)"):
             z1_abs2 = 10**d1.ll/constants.absorber_IGM[abs_igm2]-1
             r1_abs2 = cosmo.r_comoving(z1_abs2)
             w1 = d1.we
-            l1 = d1.ll
             r = random.rand(len(d1.neighs))
             w=r>rej
             npairs += len(d1.neighs)
@@ -303,7 +302,6 @@ def metal_dmat(pix,abs_igm1="LYA",abs_igm2="SiIII(1207)"):
                 r2_abs2 = cosmo.r_comoving(z2_abs2)
 
                 w2 = d2.we
-                l2 = d2.ll
 
 
                 if x_correlation:
