@@ -45,7 +45,9 @@ def exp_diff(file,ll) :
     #     alpha = sp.sqrt(4.*n_even*(n_even+1))/nexp_per_col
     # diff = 0.5 * (fltoteven-fltotodd) * alpha
 
-    alpha = sp.sqrt(4*ivtotodd*ivtoteven)/(ivtotodd+ivtoteven)
+    alpha = sp.zeros(ll.size)
+    w = (ivtotodd+ivtoteven)>0
+    alpha[w] = sp.sqrt(4*ivtotodd[w]*ivtoteven[w])/(ivtotodd[w]+ivtoteven[w])
     diff = 0.5 * (fltoteven-fltotodd) * alpha
     return diff
 
