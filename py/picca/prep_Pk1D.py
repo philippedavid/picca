@@ -22,7 +22,7 @@ def exp_diff(file,ll) :
             mask  = file[4+iexp+icol*nexp_per_col]["mask"][:]
             bins = sp.searchsorted(ll,llexp)
 
-            # exclude masks 25 (COMBINEREJ), 23 (BRIGHTSKY)?
+            # exclude masks 25 (COMBINEREJ)
             if iexp%2 == 1 :
                 civodd=sp.bincount(bins,weights=ivexp*(mask&2**25==0))
                 cflodd=sp.bincount(bins,weights=ivexp*flexp*(mask&2**25==0))
@@ -39,12 +39,14 @@ def exp_diff(file,ll) :
     w=ivtoteven>0
     fltoteven[w]/=ivtoteven[w]
 
-    alpha = 1
-    if (nexp_per_col%2 == 1) :
-        n_even = (nexp_per_col-1)//2
-        alpha = sp.sqrt(4.*n_even*(n_even+1))/nexp_per_col
-    diff = 0.5 * (fltoteven-fltotodd) * alpha ### CHECK THE * alpha (Nathalie)
+    # alpha = 1
+    # if (nexp_per_col%2 == 1) :
+    #     n_even = (nexp_per_col-1)//2
+    #     alpha = sp.sqrt(4.*n_even*(n_even+1))/nexp_per_col
+    # diff = 0.5 * (fltoteven-fltotodd) * alpha
 
+    alpha = sp.sqrt(4*ivtotodd*ivtoteven)/(ivtotodd+ivtoteven)
+    diff = 0.5 * (fltoteven-fltotodd) * alpha
     return diff
 
 
