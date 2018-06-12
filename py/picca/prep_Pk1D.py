@@ -10,6 +10,8 @@ def exp_diff(file,ll) :
     ivtotodd  = sp.zeros(ll.size)
     fltoteven = sp.zeros(ll.size)
     ivtoteven = sp.zeros(ll.size)
+    nodd      = sp.zeros(ll.size)
+    neven     = sp.zeros(ll.size)
 
     if (nexp_per_col)<2 :
         print("DBG : not enough exposures for diff")
@@ -21,33 +23,44 @@ def exp_diff(file,ll) :
             ivexp = file[4+iexp+icol*nexp_per_col]["ivar"][:]
             mask  = file[4+iexp+icol*nexp_per_col]["mask"][:]
             bins = sp.searchsorted(ll,llexp)
-
             # exclude masks 25 (COMBINEREJ)
             if iexp%2 == 1 :
                 civodd=sp.bincount(bins,weights=ivexp*(mask&2**25==0))
                 cflodd=sp.bincount(bins,weights=ivexp*flexp*(mask&2**25==0))
+                codd=sp.bincount(bins,(mask&2**25==0))
                 fltotodd[:civodd.size-1] += cflodd[:-1]
                 ivtotodd[:civodd.size-1] += civodd[:-1]
+                nodd[:civodd.size-1] += codd[:-1]
             else :
                 civeven=sp.bincount(bins,weights=ivexp*(mask&2**25==0))
                 cfleven=sp.bincount(bins,weights=ivexp*flexp*(mask&2**25==0))
+                ceven=sp.bincount(bins,(mask&2**25==0))
                 fltoteven[:civeven.size-1] += cfleven[:-1]
                 ivtoteven[:civeven.size-1] += civeven[:-1]
-
+                neven[:civeven.size-1] += ceven[:-1]
+                
     w=ivtotodd>0
     fltotodd[w]/=ivtotodd[w]
     w=ivtoteven>0
     fltoteven[w]/=ivtoteven[w]
 
+    # V0
     # alpha = 1
     # if (nexp_per_col%2 == 1) :
     #     n_even = (nexp_per_col-1)//2
     #     alpha = sp.sqrt(4.*n_even*(n_even+1))/nexp_per_col
-    # diff = 0.5 * (fltoteven-fltotodd) * alpha
 
-    alpha = sp.zeros(ll.size)
-    w = (ivtotodd+ivtoteven)>0
-    alpha[w] = sp.sqrt(4*ivtotodd[w]*ivtoteven[w])/(ivtotodd[w]+ivtoteven[w])
+    # V1
+    # alpha = sp.zeros(ll.size)
+    # w = (ivtotodd+ivtoteven)>0
+    # alpha[w] = sp.sqrt(4*ivtotodd[w]*ivtoteven[w])/(ivtotodd[w]+ivtoteven[w])
+
+    # V0b
+    alpha = sp.ones(ll.size)
+    w = (neven+nodd)>0
+    alpha[w] = sp.sqrt(4.*neven[w]*nodd[w])/(neven[w]+nodd[w])
+
+
     diff = 0.5 * (fltoteven-fltotodd) * alpha
     return diff
 
