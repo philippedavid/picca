@@ -131,6 +131,8 @@ if __name__ == '__main__':
     parser.add_argument('--nspec', type=int, default=None, required=False,
         help='Maximum number of spectra to read')
 
+    parser.add_argument('--dust-map', type=str, default=None, required=False,
+        help='Path to dust map to apply the Schlegel correction')
 
     parser.add_argument('--use-mock-continuum', action='store_true', default = False,
             help='use the mock continuum for computing the deltas')
@@ -167,6 +169,16 @@ if __name__ == '__main__':
         if (args.order != 0) and (args.order != 1):
             print("ERROR : invalid value for order, must be eqal to 0 or 1. Here order = %i"%(order))
             sys.exit(12)
+
+    ### Correct for dust with Schlegel map
+    ### https://github.com/kbarbary/sfdmap
+    if args.dust_map is not None:
+        try:
+            import sfdmap
+            forest.correc_dust = sfdmap.SFDMap(args.dust_map)
+        except:
+            print(" Error while reading dust_map file {}".format(args.dust_map))
+            sys.exit(1)
 
     ### Correct multiplicative pipeline flux calibration
     if (args.flux_calib is not None):

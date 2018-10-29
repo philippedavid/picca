@@ -1,9 +1,11 @@
 import scipy as sp
-from picca import constants
 import iminuit
-from .dla import dla
 import fitsio
 import sys
+
+from .dla import dla
+from picca import constants, utils
+
 
 def variance(var,eta,var_lss,fudge):
     return eta*var + var_lss + fudge/var
@@ -77,6 +79,8 @@ class forest(qso):
     rebin = None
     dll = None
 
+    ### Correct for dust with Schlegel map
+    correc_dust = None
     ### Correction function for multiplicative errors in pipeline flux calibration
     correc_flux = None
     ### Correction function for multiplicative errors in inverse pipeline variance calibration
@@ -151,6 +155,13 @@ class forest(qso):
         if diff is not None :
             diff = cdiff[w]/civ[w]
             reso = creso[w]/civ[w]
+
+        ## Dust correction
+        if not self.correc_dust is None:
+            ebv = self.correc_dust.ebv(ra*180./sp.pi,dec*180./sp.pi)
+            corr = utils.unred(10**ll,ebv)
+            fl /= corr
+            iv *= corr**2
 
         ## Flux calibration correction
         if not self.correc_flux is None:

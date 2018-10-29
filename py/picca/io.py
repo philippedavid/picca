@@ -552,16 +552,17 @@ def read_from_spplate(in_dir, thid, ra, dec, zqso, plate, mjd, fid, order, log=N
 
     print("reading {} plates".format(len(platemjd)))
 
-    for pm in platemjd:
+    for pm in sorted(platemjd):
         p,m = pm
         spplate = in_dir + "/{0}/spPlate-{0}-{1}.fits".format(str(p).zfill(4),m)
 
         try:
             h = fitsio.FITS(spplate)
+            head0 = h[0].read_header()
         except IOError:
             log.write("error reading {}\n".format(spplate))
             continue
-        head0 = h[0].read_header()
+
         t0 = time.time()
 
         coeff0 = head0["COEFF0"]
