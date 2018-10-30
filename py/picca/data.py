@@ -3,13 +3,12 @@ import iminuit
 import fitsio
 import sys
 
-from .dla import dla
-from picca import constants, utils
+from picca import constants, utils, dla
+from picca.utils import print
 
 
 def variance(var,eta,var_lss,fudge):
     return eta*var + var_lss + fudge/var
-
 
 class qso:
     def __init__(self,thid,ra,dec,zqso,plate,mjd,fiberid):
@@ -40,11 +39,11 @@ class qso:
             cos = x*self.xcart+y*self.ycart+z*self.zcart
             w = cos>=1.
             if w.sum()!=0:
-                print('WARNING: {} pairs have cosinus>=1.'.format(w.sum()))
+                print('WARNING: {} pairs have cos>=1.'.format(w.sum()))
                 cos[w] = 1.
             w = cos<=-1.
             if w.sum()!=0:
-                print('WARNING: {} pairs have cosinus<=-1.'.format(w.sum()))
+                print('WARNING: {} pairs have cos<=-1.'.format(w.sum()))
                 cos[w] = -1.
             angl = sp.arccos(cos)
 
@@ -483,7 +482,7 @@ class delta(qso):
         deltas=[]
         for i in range(nspec):
             if i%100==0:
-                sys.stderr.write("\rreading deltas {} of {}".format(i,nspec))
+                print("\rreading deltas {} of {}".format(i,nspec),end="")
 
             delt = de[:,i]
             ivar = iv[:,i]
