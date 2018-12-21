@@ -99,60 +99,77 @@ class forest(qso):
     mean_reso = None
     mean_z = None
 
+    ## resolution matrix for desi forests
+    reso_matrix = None
 
-    def __init__(self,ll,fl,iv,thid,ra,dec,zqso,plate,mjd,fid,order, diff=None,reso=None, mmef = None):
-        qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
 
-        ## cut to specified range
-        bins = sp.floor((ll-forest.lmin)/forest.dll+0.5).astype(int)
-        ll = forest.lmin + bins*forest.dll
-        w = (ll>=forest.lmin)
-        w = w & (ll<forest.lmax)
-        w = w & (ll-sp.log10(1.+self.zqso)>forest.lmin_rest)
-        w = w & (ll-sp.log10(1.+self.zqso)<forest.lmax_rest)
-        w = w & (iv>0.)
-        if w.sum()==0:
+    def __init__(self, ll, fl, iv, thid, ra, dec, zqso, plate, mjd, fid, order, diff=None, reso=None, mmef=None, reso_matrix=None):
+        qso.__init__(self, thid, ra, dec, zqso, plate, mjd, fid)
+
+        # cut to specified range
+        bins = sp.floor((ll - forest.lmin) / forest.dll + 0.5).astype(int)
+        ll = forest.lmin + bins * forest.dll
+        w = (ll >= forest.lmin)
+        w = w & (ll < forest.lmax)
+        w = w & (ll - sp.log10(1. + self.zqso) > forest.lmin_rest)
+        w = w & (ll - sp.log10(1. + self.zqso) < forest.lmax_rest)
+        w = w & (iv > 0.)
+        if w.sum() == 0:
             return
         bins = bins[w]
         ll = ll[w]
         fl = fl[w]
         iv = iv[w]
-        ## mmef is the mean expected flux fraction using the mock continuum
+        # mmef is the mean expected flux fraction using the mock continuum
         if mmef is not None:
             mmef = mmef[w]
-        if diff is not None :
-            diff=diff[w]
-            reso=reso[w]
+        if diff is not None:
+            diff = diff[w]
+        if reso is not None:
+            reso = reso[w]
+        if reso_matrix is not None:
+            reso_matrix = reso_matrix[:, w]
 
-        ## rebin
-        cll = forest.lmin + sp.arange(bins.max()+1)*forest.dll
-        cfl = sp.zeros(bins.max()+1)
-        civ = sp.zeros(bins.max()+1)
+        # rebin
+        cll = forest.lmin + sp.arange(bins.max() + 1) * forest.dll
+        cfl = sp.zeros(bins.max() + 1)
+        civ = sp.zeros(bins.max() + 1)
         if mmef is not None:
-            cmmef = sp.zeros(bins.max()+1)
-        ccfl = sp.bincount(bins,weights=iv*fl)
-        cciv = sp.bincount(bins,weights=iv)
+            cmmef = sp.zeros(bins.max() + 1)
+        ccfl = sp.bincount(bins, weights=iv * fl)
+        cciv = sp.bincount(bins, weights=iv)
         if mmef is not None:
-            ccmmef = sp.bincount(bins, weights=iv*mmef)
-        if diff is not None :
-            cdiff = sp.bincount(bins,weights=iv*diff)
-            creso = sp.bincount(bins,weights=iv*reso)
+            ccmmef = sp.bincount(bins, weights=iv * mmef)
+        if diff is not None:
+            cdiff = sp.bincount(bins, weights=iv * diff)
+        if reso is not None:
+            creso = sp.bincount(bins, weights=iv * reso)
+        if reso_matrix is not None:
+            creso_matrix = sp.zeros(reso_matrix.shape[0], bins.max() + 1)
+            for i, r in enumerate(reso_matrix):
+                # need to think about this, does rebinning even make sense for the resolution matrix, probably not, but to be able to get the following lines right this would be needed. And this is probably the best way if it is sensible at all, it might be necessary to compute everything in lambda instead of log(lambda) in the end
+                creso_matrix[i, :] = sp.bincount(bins, weights=iv * r)
 
         cfl[:len(ccfl)] += ccfl
         civ[:len(cciv)] += cciv
         if mmef is not None:
             cmmef[:len(ccmmef)] += ccmmef
-        w = (civ>0.)
-        if w.sum()==0:
+        w = (civ > 0.)
+        if w.sum() == 0:
             return
         ll = cll[w]
-        fl = cfl[w]/civ[w]
+        fl = cfl[w] / civ[w]
         iv = civ[w]
         if mmef is not None:
-            mmef = cmmef[w]/civ[w]
-        if diff is not None :
-            diff = cdiff[w]/civ[w]
-            reso = creso[w]/civ[w]
+            mmef = cmmef[w] / civ[w]
+        if diff is not None:
+            diff = cdiff[w] / civ[w]
+        if reso is not None:
+            reso = creso[w] / civ[w]
+        if reso_matrix is not None:
+            reso_matrix = creso_matrix[:, w] / civ[sp.newaxis, w]
+
+
 
         ## Flux calibration correction
         if not self.correc_flux is None:
@@ -172,18 +189,20 @@ class forest(qso):
         #if diff is not None :
         self.diff = diff
         self.reso = reso
+        self.reso_matrix = reso_matrix
 #        else :
 #           self.diff = sp.zeros(len(ll))
 #           self.reso = sp.ones(len(ll))
 
         # compute means
-        if reso is not None : self.mean_reso = sum(reso)/float(len(reso))
+        if reso is not None : self.mean_reso = sp.mean(reso)
+        if reso_matrix is not None: self.mean_reso_matrix = sp.mean(reso_matrix,axis=1)
 
         err = 1.0/sp.sqrt(iv)
         SNR = fl/err
-        self.mean_SNR = sum(SNR)/float(len(SNR))
+        self.mean_SNR = sp.mean(SNR)
         lam_lya = constants.absorber_IGM["LYA"]
-        self.mean_z = (sp.power(10.,ll[len(ll)-1])+sp.power(10.,ll[0]))/2./lam_lya -1.0
+        self.mean_z = sp.mean([10.**ll[len(ll)-1], 10.**ll[0]])/lam_lya -1.0
 
 
     def __add__(self,d):
@@ -219,6 +238,9 @@ class forest(qso):
         self.iv = civ[w]
         if mmef is not None:
             self.mmef = cmmef[w]
+
+
+        #there is no coaddition of resolutions in here (neither for reso nor for reso_matrix), so some patches are necessary to be able to run on desi R-band/Z-band forests; for the resolution matrix this probably does not work at all as pixelization is different!
 
         return self
 

@@ -666,10 +666,10 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order):
             w = iv>0
             fl[w]/=iv[w]
             reso_sum = b_reso[wt].sum(axis=0)
-            reso_in_km_per_s=spectral_resolution_desi(reso_sum,b_ll)
+            reso_in_km_per_s=spectral_resolution_desi(reso_sum,b_ll)       #this line needs to be changed
             diff = sp.zeros(b_ll.shape)
             d  = forest(b_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
-                    p,m,f,order,diff,reso_in_km_per_s)
+                    p,m,f,order,diff,reso_in_km_per_s, reso_matrix=reso_sum)                     #check how the coadditons work for the forest object
             ### R
             iv = r_iv[wt]
             fl = (iv*r_fl[wt]).sum(axis=0)
@@ -677,10 +677,10 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order):
             w = iv>0
             fl[w]/=iv[w]
             reso_sum = r_reso[wt].sum(axis=0)
-            reso_in_km_per_s=spectral_resolution_desi(reso_sum,r_ll)
+            reso_in_km_per_s=spectral_resolution_desi(reso_sum,r_ll)       #this line needs to be changed
             diff = sp.zeros(r_ll.shape)
             d += forest(r_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
-                    p,m,f,order,diff,reso_in_km_per_s)
+                    p,m,f,order,diff,reso_in_km_per_s, reso_matrix=reso_sum)
             ### Z
             iv = z_iv[wt]
             fl = (iv*z_fl[wt]).sum(axis=0)
@@ -688,9 +688,9 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order):
             w = iv>0
             fl[w]/=iv[w]
             reso_sum = z_reso[wt].sum(axis=0)
-            reso_in_km_per_s=spectral_resolution_desi(reso_sum,z_ll)
+            reso_in_km_per_s=spectral_resolution_desi(reso_sum,z_ll)       #this line needs to be changed
             diff = sp.zeros(z_ll.shape)
-            d += forest(z_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],p,m,f,order,diff,reso_in_km_per_s)
+            d += forest(z_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],p,m,f,order,diff,reso_in_km_per_s, reso_matrix=reso_sum)
 
             pix = pixs[wt][0]
             if pix not in data:

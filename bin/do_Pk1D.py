@@ -12,7 +12,8 @@ import fitsio
 from picca import constants
 from picca.data import delta
 from picca.Pk1D import (compute_cor_reso, compute_Pk_noise, compute_Pk_raw,
-                        fill_masked_pixels, rebin_diff_noise, split_forest)
+                        fill_masked_pixels, rebin_diff_noise, split_forest,
+                        compute_cor_reso_matrix)
 from picca.utils import print
 
 
@@ -127,6 +128,9 @@ if __name__ == '__main__':
     parser.add_argument('--debug', action='store_true', default=False, required=False,
         help='Fill root histograms for debugging')
 
+    parser.add_argument('--res-estimate', action='store_true', default='Gaussian', required=False,
+        help='Resolution correction estimated by: Gaussian, matrix')
+
 
     args = parser.parse_args()
 
@@ -232,7 +236,11 @@ if __name__ == '__main__':
 
                 # Compute resolution correction
                 delta_pixel = d.dll*sp.log(10.)*constants.speed_light/1000.
-                cor_reso = compute_cor_reso(delta_pixel,d.mean_reso,k)
+                if args['res_estimate'] == 'Gaussian':
+                    cor_reso = compute_cor_reso(delta_pixel, d.mean_reso, k)
+                elif args['res_estimate'] == 'matrix':
+                    cor_reso = compute_cor_reso_matrix(d.dll, d.mean_reso_matrix, ll_new)
+
 
                 # Compute 1D Pk
                 if (args.noise_estimate=='pipeline'):

@@ -143,29 +143,54 @@ def compute_Pk_noise(dll,iv,diff,ll,run_noise):
     err[w] = 1.0/sp.sqrt(iv[w])
 
     if (run_noise) :
-        for _ in range(nb_noise_exp): #iexp unused, but needed
+        for _ in range(nb_noise_exp):
             delta_exp= sp.zeros(nb_pixels)
             delta_exp[w] = sp.random.normal(0.,err[w])
-            _,Pk_exp = compute_Pk_raw(dll,delta_exp,ll) #k_exp unused, but needed
+            _,Pk_exp = compute_Pk_raw(dll,delta_exp,ll)
             Pk += Pk_exp
 
         Pk /= float(nb_noise_exp)
 
-    _,Pk_diff = compute_Pk_raw(dll,diff,ll) #k_diff unused, but needed
+    _,Pk_diff = compute_Pk_raw(dll,diff,ll)
 
     return Pk,Pk_diff
 
-def compute_cor_reso(delta_pixel,mean_reso,k):
+def compute_cor_reso(delta_pixel, mean_reso, k):
+    """
+    Perform the resolution + pixelization correction assuming Gaussian resolution kernel
+     as for (e)BOSS
+    """
 
     nb_bin_FFT = len(k)
     cor = sp.ones(nb_bin_FFT)
 
     sinc = sp.ones(nb_bin_FFT)
-    sinc[k>0.] =  (sp.sin(k[k>0.]*delta_pixel/2.0)/(k[k>0.]*delta_pixel/2.0))**2
+    sinc[k > 0.] = (sp.sin(k[k > 0.] * delta_pixel / 2.0) /
+                    (k[k > 0.] * delta_pixel / 2.0))**2
 
-    cor *= sp.exp(-(k*mean_reso)**2)
+    cor *= sp.exp(-(k * mean_reso)**2)
     cor *= sinc
     return cor
+
+
+def compute_cor_reso_matrix(dll, ll, mean_reso_matrix):
+    """
+    Perform the resolution + pixelization correction assuming general resolution kernel
+     as e.g. DESI resolution matrix
+    """
+    delta_pixel = dll*sp.log(10.)*constants.speed_light/1000.
+    k, Wres2 = compute_Pk_raw(dll,mean_reso_matrix,ll)
+    Wres2 /= Wres2[0]
+
+    nb_bin_FFT = len(k)
+    sinc = sp.ones(nb_bin_FFT)
+    sinc[k > 0.] = (sp.sin(k[k > 0.] * delta_pixel / 2.0) /
+                    (k[k > 0.] * delta_pixel / 2.0))**2
+    cor = sp.ones(nb_bin_FFT)
+    cor *= Wres2
+    cor *= sinc
+    return cor
+
 
 
 class Pk1D :
