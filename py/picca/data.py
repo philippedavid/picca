@@ -363,7 +363,7 @@ class forest(qso):
 
 class delta(qso):
 
-    def __init__(self,thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,iv,diff,m_SNR,m_reso,m_z,dll):
+    def __init__(self,thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,iv,diff,m_SNR,m_reso,m_z,dll,m_reso_matrix=None):
 
         qso.__init__(self,thid,ra,dec,zqso,plate,mjd,fid)
         self.ll = ll
@@ -377,6 +377,7 @@ class delta(qso):
         self.mean_reso = m_reso
         self.mean_z = m_z
         self.dll = dll
+        self.mean_reso_matrix=m_reso_matrix
 
     @classmethod
     def from_forest(cls,f,st,var_lss,eta,fudge,mc=False):
@@ -398,8 +399,9 @@ class delta(qso):
             diff /= mef
         iv = f.iv/(eta+(eta==0))*(mef**2)
 
+
         return cls(f.thid,f.ra,f.dec,f.zqso,f.plate,f.mjd,f.fid,ll,we,f.co,de,f.order,
-                   iv,diff,f.mean_SNR,f.mean_reso,f.mean_z,f.dll)
+                   iv,diff,f.mean_SNR,f.mean_reso,f.mean_z,f.dll,f.mean_reso_matrix)
 
 
     @classmethod
