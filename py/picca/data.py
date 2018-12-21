@@ -1,7 +1,6 @@
 import scipy as sp
 import iminuit
 import fitsio
-import sys
 
 from picca import constants, utils, dla
 from picca.utils import print
