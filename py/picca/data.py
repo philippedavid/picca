@@ -433,6 +433,10 @@ class delta(qso):
                 raise
                 mean_resomat = None
 
+            iv=iv.astype(float)   #to ensure the endianess is right for the fft
+            diff=diff.astype(float)
+            de=de.astype(float)
+            ll=ll.astype(float)
         else :
             iv = None
             diff = None
