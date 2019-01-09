@@ -128,7 +128,7 @@ if __name__ == '__main__':
     parser.add_argument('--debug', action='store_true', default=False, required=False,
         help='Fill root histograms for debugging')
 
-    parser.add_argument('--res-estimate', action='store_true', default='Gaussian', required=False,
+    parser.add_argument('--res-estimate', default='Gaussian', required=False,
         help='Resolution correction estimated by: Gaussian, matrix')
 
 
