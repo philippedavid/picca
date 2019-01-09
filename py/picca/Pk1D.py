@@ -180,7 +180,7 @@ def compute_cor_reso_matrix(dll, mean_reso_matrix, ll):
     """
     delta_pixel = dll*sp.log(10.)*constants.speed_light/1000.
     r=mean_reso_matrix
-    r=sp.append(r, sp.zeros(dll.size-mean_reso_matrix.size))
+    r=sp.append(r, sp.zeros(ll.size-mean_reso_matrix.size))
     k, Wres2 = compute_Pk_raw(dll,r,ll)
     Wres2 /= Wres2[0]
 
