@@ -168,7 +168,7 @@ if __name__ == '__main__':
     if (args.in_format=='fits') :
         fi = glob.glob(args.in_dir+"/delta-*.fits.gz")
     elif (args.in_format=='ascii') :
-        fi = glob.glob(args.in_dir+"/*.txt")
+        fi = glob.glob(args.in_dir+"/delta-*.txt")
 
     data = {}
     ndata = 0
