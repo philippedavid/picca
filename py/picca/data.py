@@ -427,9 +427,9 @@ class delta(qso):
                 n_resmat=head['RESMATN']
                 mean_resomat=[]
                 for i in range(n_resmat):
-                    mean_resomat.extend(head['RESMAT{:d}'].format(i))
+                    mean_resomat.extend(head['RESMAT{:d}'.format(i)])
                 mean_resomat=sp.array(mean_resomat)
-            except:
+            except KeyError:
                 raise
                 mean_resomat = None
 
