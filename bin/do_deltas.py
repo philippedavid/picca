@@ -393,7 +393,7 @@ if __name__ == '__main__':
     for p in sorted(list(deltas.keys())):
 
         if len(deltas[p])==0: continue
-        if (args.delta_format=='Pk1D_ascii') :
+        if (args.delta_format.lower()=='pk1d_ascii') :
             out_ascii = open(args.out_dir+"/delta-{}".format(p)+".txt",'w')
             for d in deltas[p]:
                 nbpixel = len(d.de)
@@ -429,7 +429,7 @@ if __name__ == '__main__':
                        {'name':'ORDER','value':d.order,'comment':'Order of the continuum fit'},
                 ]
 
-                if (args.delta_format=='Pk1D'):
+                if (args.delta_format.lower()=='pk1d'):
                     hd += [{'name':'MEANZ','value':d.mean_z,'comment':'Mean redshift'},
                            {'name':'MEANRESO','value':d.mean_reso,'comment':'Mean resolution'},
                            {'name':'MEANSNR','value':d.mean_SNR,'comment':'Mean SNR'},
