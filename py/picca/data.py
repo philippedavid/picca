@@ -412,14 +412,14 @@ class delta(qso):
 
         de = h['DELTA'][:]
         if de.dtype.byteorder != '=':
-            de = de.astype('=f8')
+            de = de.byteswap().newbyteorder()
         ll = h['LOGLAM'][:]
 
 
         if  Pk1D_type :
             iv = h['IVAR'][:]
             if iv.dtype.byteorder != '=':
-                iv = iv.astype('=f8')
+                iv = iv.byteswap().newbyteorder()
             diff = h['DIFF'][:]
             m_SNR = head['MEANSNR']
             m_reso = head['MEANRESO']
