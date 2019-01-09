@@ -236,9 +236,9 @@ if __name__ == '__main__':
 
                 # Compute resolution correction
                 delta_pixel = d.dll*sp.log(10.)*constants.speed_light/1000.
-                if args['res_estimate'] == 'Gaussian':
+                if args.res_estimate == 'Gaussian':
                     cor_reso = compute_cor_reso(delta_pixel, d.mean_reso, k)
-                elif args['res_estimate'] == 'matrix':
+                elif args.res_estimate == 'matrix':
                     cor_reso = compute_cor_reso_matrix(d.dll, d.mean_reso_matrix, ll_new)
 
 
