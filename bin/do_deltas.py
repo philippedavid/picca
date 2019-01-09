@@ -138,6 +138,9 @@ if __name__ == '__main__':
     parser.add_argument('--use-mock-continuum', action='store_true', default = False,
             help='use the mock continuum for computing the deltas')
 
+    parser.add_argument('--use-resolution-matrix', action='store_true', default = False,
+            help='should the resolution matrix be stored with the deltas (only implemented for Pk1D_ascii)')
+
     args = parser.parse_args()
 
     ## init forest class
@@ -403,8 +406,9 @@ if __name__ == '__main__':
                 for i in range(nbpixel): line += '{} '.format(d.ll[i])
                 for i in range(nbpixel): line += '{} '.format(d.iv[i])
                 for i in range(nbpixel): line += '{} '.format(d.diff[i])
-                line += '{}'.format(len(d.mean_reso_matrix))
-                for _,r in enumerate(d.mean_reso_matrix): line += '{} '.format(r)
+                if args.use_resolution_matrix:
+                    line += '{} '.format(len(d.mean_reso_matrix))
+                    for _,r in enumerate(d.mean_reso_matrix): line += '{} '.format(r)
 
                 line +=' \n'
                 out_ascii.write(line)
@@ -437,6 +441,10 @@ if __name__ == '__main__':
                     diff = d.diff
                     if diff is None:
                         diff = d.ll*0
+                    if args.use_resolution_matrix:
+                        hd+=[{'name':'RESMATN','value':len(d.mean_reso_matrix),'comment':'lenghth of the mean resolution matrix'}]
+                        for i,r in enumerate(d.mean_reso_matrix):
+                            hd+=[{'name':'RESMAT{:d}'.format(i),'value':r,'comment':'entry of the mean resolution matrix'}]
 
                     cols=[d.ll,d.de,d.iv,diff]
                     names=['LOGLAM','DELTA','IVAR','DIFF']

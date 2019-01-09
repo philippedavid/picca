@@ -423,6 +423,16 @@ class delta(qso):
             dll =  head['DLL']
             we = None
             co = None
+            try:
+                n_resmat=head['RESMATN']
+                mean_resomat=[]
+                for i in range(n_resmat):
+                    mean_resomat.extend(head['RESMAT{:d}'].format(i))
+                mean_resomat=sp.array(mean_resomat)
+            except:
+                raise
+                mean_resomat = None
+
         else :
             iv = None
             diff = None
@@ -432,6 +442,7 @@ class delta(qso):
             m_z = None
             we = h['WEIGHT'][:]
             co = h['CONT'][:]
+            mean_resomat = None
 
 
         thid = head['THING_ID']
@@ -447,7 +458,7 @@ class delta(qso):
         except KeyError:
             order = 1
         return cls(thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,
-                   iv,diff,m_SNR,m_reso,m_z,dll)
+                   iv,diff,m_SNR,m_reso,m_z,dll,mean_resomat)
 
 
     @classmethod
