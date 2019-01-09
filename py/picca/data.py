@@ -471,14 +471,19 @@ class delta(qso):
         iv = sp.array(a[11+2*nbpixel:11+3*nbpixel]).astype(float)
         diff = sp.array(a[11+3*nbpixel:11+4*nbpixel]).astype(float)
 
-
+        try: #this could be used to get the
+            nresomat = int(a[11+4*nbpixel])
+            mean_resomat = sp.array(a[12+4*nbpixel:12+4*nbpixel+nresomat]).astype(float)
+        except:
+            raise
+            mean_resomat=None
         thid = 0
         order = 0
         we = None
         co = None
 
         return cls(thid,ra,dec,zqso,plate,mjd,fid,ll,we,co,de,order,
-                   iv,diff,m_SNR,m_reso,m_z,dll)
+                   iv,diff,m_SNR,m_reso,m_z,dll,mean_resomat)
 
     @staticmethod
     def from_image(f):

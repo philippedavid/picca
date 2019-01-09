@@ -403,6 +403,9 @@ if __name__ == '__main__':
                 for i in range(nbpixel): line += '{} '.format(d.ll[i])
                 for i in range(nbpixel): line += '{} '.format(d.iv[i])
                 for i in range(nbpixel): line += '{} '.format(d.diff[i])
+                line += '{}'.format(len(d.mean_reso_matrix))
+                for _,r in enumerate(d.mean_reso_matrix): line += '{} '.format(r)
+
                 line +=' \n'
                 out_ascii.write(line)
 

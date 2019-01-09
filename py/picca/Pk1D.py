@@ -179,7 +179,9 @@ def compute_cor_reso_matrix(dll, ll, mean_reso_matrix):
      as e.g. DESI resolution matrix
     """
     delta_pixel = dll*sp.log(10.)*constants.speed_light/1000.
-    k, Wres2 = compute_Pk_raw(dll,mean_reso_matrix,ll)
+    r=mean_reso_matrix
+    r=sp.append(sp.zeros(dll.size-mean_reso_matrix.size))
+    k, Wres2 = compute_Pk_raw(dll,r,ll)
     Wres2 /= Wres2[0]
 
     nb_bin_FFT = len(k)
