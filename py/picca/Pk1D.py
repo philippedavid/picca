@@ -182,14 +182,15 @@ def compute_cor_reso_matrix(dll, mean_reso_matrix, ll, k):
     nwave=len(ll)
     r=mean_reso_matrix
     r=sp.append(r, sp.zeros(ll.size-mean_reso_matrix.size))
+
     length_lambda = nwave-1
     length_lambda2 = (ll[-1]-ll[0])/float(nwave-1)*constants.speed_light/1000.*sp.log(10.)*nwave
-    Wres2pix=((sp.absolute(sp.fftpack.fft(mean_reso_matrix)))**2)[1:nwave//2]*length_lambda/nwave**2
+    Wres2pix=((sp.absolute(sp.fftpack.fft(r)))**2)[1:nwave//2]*length_lambda/nwave**2
     #k, Wres2 = compute_Pk_raw(dll,r,ll)
     Wres2pix /= Wres2pix[0]
     kpix = sp.arange(nwave//2-1,dtype=float)*2*sp.pi/length_lambda
     kvel=kpix*length_lambda2/length_lambda
-    
+
     Wres2int=sp.interpolate.interp1d(kvel, Wres2pix)
     Wres2=Wres2int(k)
     nb_bin_FFT = len(k)
