@@ -430,7 +430,6 @@ class delta(qso):
                     mean_resomat.append(head['RESMAT{:d}'.format(i)])
                 mean_resomat=sp.array(mean_resomat)
             except KeyError:
-                raise
                 mean_resomat = None
 
             iv=iv.astype(float)   #to ensure the endianess is right for the fft
@@ -489,8 +488,7 @@ class delta(qso):
         try: #this could be used to get the
             nresomat = int(a[11+4*nbpixel])
             mean_resomat = sp.array(a[12+4*nbpixel:12+4*nbpixel+nresomat]).astype(float)
-        except:
-            raise
+        except IndexError:
             mean_resomat=None
         thid = 0
         order = 0
