@@ -179,20 +179,11 @@ def compute_cor_reso_matrix(dll, mean_reso_matrix, ll, k):
      as e.g. DESI resolution matrix
     """
     delta_pixel = dll*sp.log(10.)*constants.speed_light/1000.
-    nwave=len(ll)
     r=mean_reso_matrix
     r=sp.append(r, sp.zeros(ll.size-mean_reso_matrix.size))
+    k, Wres2 = compute_Pk_raw(dll,r,ll)
+    Wres2 /= Wres2[0]
 
-    length_lambda = nwave-1
-    length_lambda2 = (ll[-1]-ll[0])/float(nwave-1)*constants.speed_light/1000.*sp.log(10.)*nwave
-    Wres2pix=((sp.absolute(sp.fftpack.fft(r)))**2)[1:nwave//2]*length_lambda/nwave**2
-    #k, Wres2 = compute_Pk_raw(dll,r,ll)
-    Wres2pix /= Wres2pix[0]
-    kpix = sp.arange(nwave//2-1,dtype=float)*2*sp.pi/length_lambda
-    kvel=kpix*length_lambda2/length_lambda
-
-    Wres2int=sp.interpolate.interp1d(kvel, Wres2pix)
-    Wres2=Wres2int(k)
     nb_bin_FFT = len(k)
     sinc = sp.ones(nb_bin_FFT)
     sinc[k > 0.] = (sp.sin(k[k > 0.] * delta_pixel / 2.0) /
@@ -200,7 +191,6 @@ def compute_cor_reso_matrix(dll, mean_reso_matrix, ll, k):
     cor = sp.ones(nb_bin_FFT)
     cor *= Wres2
     cor *= sinc
-    import ipdb; ipdb.set_trace()
     return cor
 
 

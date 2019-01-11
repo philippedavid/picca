@@ -81,4 +81,4 @@ def spectral_resolution_desi(reso_matrix, ll) :
 
     reso_in_km_per_s = rms_in_pixel*constants.speed_light/1000.*dll*sp.log(10.0)
 
-    return reso_in_km_per_s
+    return reso_in_km_per_s, rms_in_pixel
