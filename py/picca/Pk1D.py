@@ -200,6 +200,7 @@ def compute_cor_reso_matrix(dll, mean_reso_matrix, ll, k):
     cor = sp.ones(nb_bin_FFT)
     cor *= Wres2
     cor *= sinc
+    import ipdb; ipdb.set_trace()
     return cor
 
 
