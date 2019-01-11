@@ -398,7 +398,6 @@ if __name__ == '__main__':
             for d in deltas[p]:
                 nbpixel = len(d.de)
                 dll = d.dll
-                import ipdb; ipdb.set_trace()
                 if (args.mode=='desi') : dll = (d.ll[-1]-d.ll[0])/float(len(d.ll)-1)
                 line = '{} {} {} '.format(d.plate,d.mjd,d.fid)
                 line += '{} {} {} '.format(d.ra,d.dec,d.zqso)
@@ -435,6 +434,8 @@ if __name__ == '__main__':
                            {'name':'MEANRESO','value':d.mean_reso,'comment':'Mean resolution'},
                            {'name':'MEANSNR','value':d.mean_SNR,'comment':'Mean SNR'},
                     ]
+                    import ipdb; ipdb.set_trace()
+
                     dll = d.dll
                     if (args.mode=='desi'):
                         dll = (d.ll[-1]-d.ll[0])/float(len(d.ll)-1)
