@@ -434,7 +434,7 @@ if __name__ == '__main__':
                            {'name':'MEANRESO','value':d.mean_reso,'comment':'Mean resolution'},
                            {'name':'MEANSNR','value':d.mean_SNR,'comment':'Mean SNR'},
                     ]
-                    import ipdb; ipdb.set_trace()
+#                    import ipdb; ipdb.set_trace()
 
                     dll = d.dll
                     if (args.mode=='desi'):
