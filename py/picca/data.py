@@ -197,8 +197,7 @@ class forest(qso):
         # compute means
         if reso is not None : self.mean_reso = sp.mean(reso[5:-5])*constants.speed_light/1000.*forest.dll*sp.log(10.0) #as I gave it reso_pix instead of km/s
         if reso_matrix is not None:
-            self.mean_reso_matrix = sp.mean(reso_matrix,axis=1)[5:-5]   #this might be extended by properly filtering out pixels where boundary effects play a role (instead of just removing 5 pixels on each side).
-            print (reso_matrix.shape)
+            self.mean_reso_matrix = sp.mean(reso_matrix,axis=1)[:,5:-5]   #this might be extended by properly filtering out pixels where boundary effects play a role (instead of just removing 5 pixels on each side).
         err = 1.0/sp.sqrt(iv)
         SNR = fl/err
         self.mean_SNR = sp.mean(SNR)
