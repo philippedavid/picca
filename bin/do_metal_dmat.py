@@ -10,7 +10,7 @@ from picca import constants, cf, utils, io
 from picca.utils import print
 
 def calc_metal_dmat(abs_igm1,abs_igm2,p):
-    if cf.x_correlation:
+    if args.in_dir2:
         cf.fill_neighs_x_correlation(p)
     else:
         cf.fill_neighs(p)
@@ -83,8 +83,8 @@ if __name__ == '__main__':
     parser.add_argument('--fid-Om', type=float, default=0.315, required=False,
         help='Omega_matter(z=0) of fiducial LambdaCDM cosmology')
 
-    parser.add_argument('--no-same-wavelength-pairs', action='store_true', required=False,
-        help='Reject pairs with same wavelength')
+    parser.add_argument('--remove-same-half-plate-close-pairs', action='store_true', required=False,
+        help='Reject pairs in the first bin in r-parallel from same half plate')
 
     parser.add_argument('--rej', type=float, default=1., required=False,
         help='Fraction of rejected forest-forest pairs: -1=no rejection, 1=all rejection')
@@ -98,6 +98,8 @@ if __name__ == '__main__':
     parser.add_argument('--nspec', type=int, default=None, required=False,
         help='Maximum number of spectra to read')
 
+    parser.add_argument('--unfold-cf', action='store_true', required=False,
+        help='rp can be positive or negative depending on the relative position between absorber1 and absorber2')
 
     args = parser.parse_args()
 
@@ -118,8 +120,8 @@ if __name__ == '__main__':
     cf.zref = args.z_ref
     cf.alpha = args.z_evol
     cf.rej = args.rej
-    cf.no_same_wavelength_pairs = args.no_same_wavelength_pairs
     cf.lambda_abs = constants.absorber_IGM[args.lambda_abs]
+    cf.remove_same_half_plate_close_pairs = args.remove_same_half_plate_close_pairs
     ## use a metal grid equal to the lya grid
     cf.npm = args.np
     cf.ntm = args.nt
@@ -142,7 +144,8 @@ if __name__ == '__main__':
 
     ### Read data 2
     if args.in_dir2 or args.lambda_abs2:
-        cf.x_correlation = True
+        if args.lambda_abs2 or args.unfold_cf:
+            cf.x_correlation = True
         cf.alpha2 = args.z_evol2
         if args.in_dir2 is None:
             args.in_dir2 = args.in_dir
