@@ -656,41 +656,6 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
             if wt.sum()==0:
                 print("\nError reading thingid {}\n".format(t))
                 continue
-<<<<<<< HEAD
-            ### B
-            iv = b_iv[wt]
-            fl = (iv*b_fl[wt]).sum(axis=0)
-            iv = iv.sum(axis=0)
-            w = iv>0
-            fl[w]/=iv[w]
-            reso_sum = b_reso[wt].sum(axis=0)
-            reso_in_km_per_s, reso_pix=spectral_resolution_desi(reso_sum,b_ll)       #this line needs to be changed
-            diff = sp.zeros(b_ll.shape)
-            d  = forest(b_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
-                    p,m,f,order,diff,reso_pix, reso_matrix=reso_sum)                     #check how the coadditons work for the forest object
-
-            ### R
-            iv = r_iv[wt]
-            fl = (iv*r_fl[wt]).sum(axis=0)
-            iv = iv.sum(axis=0)
-            w = iv>0
-            fl[w]/=iv[w]
-            reso_sum = r_reso[wt].sum(axis=0)
-            reso_in_km_per_s, reso_pix=spectral_resolution_desi(reso_sum,r_ll)       #this line needs to be changed
-            diff = sp.zeros(r_ll.shape)
-            d += forest(r_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
-                    p,m,f,order,diff,reso_pix, reso_matrix=reso_sum)
-            ### Z
-            iv = z_iv[wt]
-            fl = (iv*z_fl[wt]).sum(axis=0)
-            iv = iv.sum(axis=0)
-            w = iv>0
-            fl[w]/=iv[w]
-            reso_sum = z_reso[wt].sum(axis=0)
-            reso_in_km_per_s, reso_pix=spectral_resolution_desi(reso_sum,z_ll)       #this line needs to be changed
-            diff = sp.zeros(z_ll.shape)
-            d += forest(z_ll,fl,iv,t,ra[wt][0],de[wt][0],ztable[t],p,m,f,order,diff,reso_pix, reso_matrix=reso_sum)
-=======
 
             d = None
             for tspecData in specData.values():
@@ -712,7 +677,6 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
                     d = copy.deepcopy(td)
                 else:
                     d += td
->>>>>>> origin/master
 
             pix = pixs[wt][0]
             if pix not in data:
