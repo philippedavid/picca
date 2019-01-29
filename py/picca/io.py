@@ -637,7 +637,7 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
 
         specData = {}
         for spec in ['B','R','Z']:
-            dic = {}
+                dic = {}
 #            try:
                 dic['LL'] = sp.log10(h['{}_WAVELENGTH'.format(spec)].read())
                 dic['FL'] = h['{}_FLUX'.format(spec)].read()
