@@ -637,8 +637,8 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
 
         specData = {}
         for spec in ['B','R','Z']:
-                dic = {}
-#            try:
+            dic = {}
+            try:
                 dic['LL'] = sp.log10(h['{}_WAVELENGTH'.format(spec)].read())
                 dic['FL'] = h['{}_FLUX'.format(spec)].read()
                 dic['IV'] = h['{}_IVAR'.format(spec)].read()*(h['{}_MASK'.format(spec)].read()==0)
@@ -647,15 +647,15 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
                     dic[k][w] = 0.
                 dic['RESO'] = h['{}_RESOLUTION'.format(spec)].read()
                 specData[spec] = dic
-#            except OSError:
-#                pass
+            except OSError:
+                pass
         h.close()
 
         for t,p,m,f in zip(tid_qsos,plate_qsos,mjd_qsos,fid_qsos):
             wt = in_tids == t
-            if wt.sum()==0:
-                print("\nError reading thingid {}\n".format(t))
-                continue
+#            if wt.sum()==0:
+#                print("\nError reading thingid {}\n".format(t))
+#                continue
 
             d = None
             for tspecData in specData.values():
