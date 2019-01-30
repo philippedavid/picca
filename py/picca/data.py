@@ -101,6 +101,7 @@ class forest(qso):
 
     ## resolution matrix for desi forests
     reso_matrix = None
+    mean_reso_matrix = None
 
 
     def __init__(self, ll, fl, iv, thid, ra, dec, zqso, plate, mjd, fid, order, diff=None, reso=None, mmef=None, reso_matrix=None):
