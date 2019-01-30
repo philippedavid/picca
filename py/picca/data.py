@@ -243,6 +243,7 @@ class forest(qso):
 
 
         #there is no coaddition of resolutions in here (neither for reso nor for reso_matrix), so some patches are necessary to be able to run on desi R-band/Z-band forests; for the resolution matrix this probably does not work at all as pixelization is different!
+        #note that some of this already changed in newer master versions
 
         return self
 
