@@ -222,6 +222,8 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
         zcat_thid = h[1]['TARGETID'][:]
     elif 'THING_ID' in key_val:
         zcat_thid = h[1]['THING_ID'][:]
+    elif 'MOCKID' in key_val:
+        zcat_thid = h[1]['MOCKID'][:]
     w = h[1]['Z'][:]>max(0.,lObs_min/lRF_max -1.)
     w &= h[1]['Z'][:]<max(0.,lObs_max/lRF_min -1.)
     zcat_ra = h[1]['RA'][:][w].astype('float64')*sp.pi/180.
