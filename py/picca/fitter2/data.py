@@ -97,6 +97,8 @@ class data:
 
         self.pk = pk.pk(getattr(pk, dic_init['model']['model-pk']))
         self.pk *= partial(getattr(pk,'G2'), dataset_name=self.name)
+        if 'pk-gauss-smoothing' in dic_init['model']:
+            self.pk *= partial(getattr(pk, dic_init['model']['pk-gauss-smoothing']))
         if 'small scale nl' in dic_init['model']:
             self.pk *= partial(getattr(pk, dic_init['model']['small scale nl']), pk_fid=dic_init['model']['pk']*((1+zref)/(1.+zeff))**2)
 
@@ -274,6 +276,8 @@ class data:
                         self.rt_met[(m1, m2)] = hmet[2]["RT_{}_{}".format(m1,m2)][:]
                         self.z_met[(m1, m2)] = hmet[2]["Z_{}_{}".format(m1,m2)][:]
                         self.dm_met[(m1, m2)] = csr_matrix(hmet[2]["DM_{}_{}".format(m1,m2)][:])
+
+            hmet.close()
 
     def xi_model(self, k, pk_lin, pars):
         xi = self.xi(self.r, self.mu, k, pk_lin, self.pk, \

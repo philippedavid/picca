@@ -217,34 +217,33 @@ class forest(qso):
         if not hasattr(self,'ll') or not hasattr(d,'ll'):
             return self
 
+        dic = {}  # this should contain all quantities that are to be coadded with ivar weighting
+
         ll = sp.append(self.ll,d.ll)
-        fl = sp.append(self.fl,d.fl)
+        dic['fl'] = sp.append(self.fl, d.fl)
         iv = sp.append(self.iv,d.iv)
-        mmef = None
+
         if self.mmef is not None:
-            mmef = sp.append(self.mmef,d.mmef)
+            dic['mmef'] = sp.append(self.mmef, d.mmef)
+        if self.diff is not None:
+            dic['diff'] = sp.append(self.diff, d.diff)
+        if self.reso is not None:
+            dic['reso'] = sp.append(self.reso, d.reso)
 
         bins = sp.floor((ll-forest.lmin)/forest.dll+0.5).astype(int)
         cll = forest.lmin + sp.arange(bins.max()+1)*forest.dll
-        cfl = sp.zeros(bins.max()+1)
         civ = sp.zeros(bins.max()+1)
-        if mmef is not None:
-            cmmef = sp.zeros(bins.max()+1)
-        ccfl = sp.bincount(bins,weights=iv*fl)
         cciv = sp.bincount(bins,weights=iv)
-        if mmef is not None:
-            ccmmef = sp.bincount(bins,weights=iv*mmef)
-        cfl[:len(ccfl)] += ccfl
         civ[:len(cciv)] += cciv
-        if mmef is not None:
-            cmmef[:len(ccmmef)] += ccmmef
         w = (civ>0.)
-
         self.ll = cll[w]
-        self.fl = cfl[w]/civ[w]
         self.iv = civ[w]
-        if mmef is not None:
-            self.mmef = cmmef[w]
+
+        for k, v in dic.items():
+            cnew = sp.zeros(bins.max() + 1)
+            ccnew = sp.bincount(bins, weights=iv * v)
+            cnew[:len(ccnew)] += ccnew
+            setattr(self, k, cnew[w] / civ[w])
 
 
         #there is no coaddition of resolutions in here (neither for reso nor for reso_matrix), so some patches are necessary to be able to run on desi R-band/Z-band forests; for the resolution matrix this probably does not work at all as pixelization is different!
@@ -267,8 +266,9 @@ class forest(qso):
         self.iv = self.iv[w]
         if self.mmef is not None:
             self.mmef = self.mmef[w]
-        if self.diff is not None :
+        if self.diff is not None:
              self.diff = self.diff[w]
+        if self.reso is not None:
              self.reso = self.reso[w]
 
     def add_dla(self,zabs,nhi,mask=None):
@@ -292,6 +292,7 @@ class forest(qso):
         self.T_dla = self.T_dla[w]
         if self.diff is not None :
             self.diff = self.diff[w]
+        if self.reso is not None:
             self.reso = self.reso[w]
 
     def add_absorber(self,lambda_absorber):
@@ -306,6 +307,7 @@ class forest(qso):
         self.fl = self.fl[w]
         if self.diff is not None :
             self.diff = self.diff[w]
+        if self.reso is not None:
             self.reso = self.reso[w]
 
     def cont_fit(self):
