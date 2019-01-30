@@ -672,7 +672,7 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
                     reso_in_km_per_s = None
                     diff = None
                 td = forest(tspecData['LL'],fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
-                    p,m,f,order,diff,reso=reso_in_pix,reso_matrix=reso_sum)
+                            p,m,f,order,diff,reso=reso_in_pix,reso_matrix=reso_sum)
                 if d is None:
                     d = copy.deepcopy(td)
                 else:
