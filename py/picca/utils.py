@@ -238,7 +238,10 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     elif indir is not None:
         fi = glob.glob(indir+'/*/*/transmission*.fits') + glob.glob(indir+'/*/*/transmission*.fits.gz')
         h = fitsio.FITS(sp.sort(sp.array(fi))[0])
-        in_nside = h[1].read_header()['NSIDE']
+        if 'NSIDE' in key_val:
+            in_nside = h[1].read_header()['NSIDE']
+        else:
+            in_nside=int(fi.split('transmission-')[1].split('-')[0])
         nest = True
         h.close()
         in_pixs = healpy.ang2pix(in_nside, sp.pi/2.-zcat_dec, zcat_ra, nest=nest)
