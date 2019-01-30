@@ -666,10 +666,12 @@ def read_from_desi(nside,in_dir,thid,ra,dec,zqso,plate,mjd,fid,order,pk1d=None):
                 fl[w] /= iv[w]
                 if not pk1d is None:
                     reso_sum = tspecData['RESO'][wt].sum(axis=0)
-                    reso_in_km_per_s = spectral_resolution_desi(reso_sum,tspecData['LL'])
+                    reso_in_km_per_s, reso_in_pix = spectral_resolution_desi(reso_sum,tspecData['LL'])
                     diff = sp.zeros(tspecData['LL'].shape)
                 else:
                     reso_in_km_per_s = None
+                    reso_in_pix = None
+                    reso_sum = None
                     diff = None
                 td = forest(tspecData['LL'],fl,iv,t,ra[wt][0],de[wt][0],ztable[t],
                             p,m,f,order,diff,reso=reso_in_pix,reso_matrix=reso_sum)
