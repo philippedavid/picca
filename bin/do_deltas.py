@@ -113,7 +113,7 @@ if __name__ == '__main__':
     parser.add_argument('--vlss-max',type=float,default=0.3,required=False,
         help='Upper limit for variance LSS')
 
-    parser.add_argument('--delta-format',type=str,default=None,required=False,
+    parser.add_argument('--delta-format',type=str,default='',required=False,
         help='Format for Pk 1D: Pk1D')
 
     parser.add_argument('--use-ivar-as-weight', action='store_true', default=False,
