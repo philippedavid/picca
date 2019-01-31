@@ -360,7 +360,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
             if pk1d_format:
                 hd.update( {'MEANZ':sp.mean([10.**ll[len(ll)-1], 10.**ll[0]])/lam_lya -1.0,
                             'MEANRESO':0.01,
-                            'MEANSNR':1000000})
+                            'MEANSNR':1000})
 
                 dll = (d.ll[-1]-d.ll[0])/float(len(d.ll)-1)
                 hd.update({'DLL':dll})
@@ -369,7 +369,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
                     diff = d.ll*0
                 iv=d.iv
                 if iv is None:
-                    iv = sp.ones(d.ll.size)*1e12
+                    iv = sp.ones(d.ll.size)*1e6
                 cols=[d.ll,d.de,iv,diff]
                 names=['LOGLAM','DELTA','IVAR','DIFF']
                 units=['log Angstrom','','','']
