@@ -341,7 +341,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     ### Transform transmission to delta and store it
     for nf, p in enumerate(sorted(list(deltas.keys()))):
         print("\rwrite {} of {} ".format(nf,len(list(deltas.keys()))), end="")
-        out = fitsio.FITS(outdir+'/delta-{}'.format(p)+'.fits','rw',clobber=True)
+        out = fitsio.FITS(outdir+'/delta-{}'.format(p)+'.fits.gz','rw',clobber=True)
         for d in deltas[p]:
             bins = sp.floor((d.ll-lmin)/dll+0.5).astype(int)
             d.de = d.de/T_stack[bins] - 1.
@@ -378,7 +378,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
                 names = ['LOGLAM','DELTA','WEIGHT','CONT']
                 units=['log Angstrom','','','']
                 comments = ['Log lambda','Delta field','Pixel weights','Continuum']
-                out.write(cols,names=names,header=hd,extname=str(d.thid))
+            out.write(cols,names=names,header=hd,extname=str(d.thid))
 
 
         out.close()
