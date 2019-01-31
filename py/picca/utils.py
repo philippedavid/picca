@@ -196,7 +196,7 @@ def desi_from_ztarget_to_drq(ztarget,drq,spectype='QSO',downsampling_z_cut=None,
     out.close()
 
     return
-def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None,lObs_min=3600.,lObs_max=5500.,lRF_min=1040.,lRF_max=1200.,dll=3.e-4,nspec=None):
+def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None,lObs_min=3600.,lObs_max=5500.,lRF_min=1040.,lRF_max=1200.,dll=3.e-4,nspec=None, pk1d_format=False):
     from picca.data import delta
     """Convert desi transmission files to picca delta files
 
@@ -210,6 +210,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
         lRF_max (float) = 1200.: max Rest Frame wavelength in Angstrom
         dll (float) = 3.e-4: size of the bins in log lambda
         nspec (int) = None: number of spectra, if 'None' use all
+        pk1d_format = False (int): should the output use the pk1d format for delta files
 
     Returns:
         None
@@ -343,7 +344,6 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
             bins = sp.floor((d.ll-lmin)/dll+0.5).astype(int)
             d.de = d.de/T_stack[bins] - 1.
             d.we *= T_stack[bins]**2
-
             hd = {}
             hd['RA'] = d.ra
             hd['DEC'] = d.dec
@@ -354,10 +354,32 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
             hd['MJD'] = d.mjd
             hd['FIBERID'] = d.fid
             hd['ORDER'] = d.order
+            lam_lya = constants.absorber_IGM["LYA"]
+            if pk1d_format:
+                hd += [{'name':'MEANZ','value':sp.mean([10.**ll[len(ll)-1], 10.**ll[0]])/lam_lya -1.0,'comment':'Mean redshift'},
+                       {'name':'MEANRESO','value':1000000,'comment':'Mean resolution'},
+                       {'name':'MEANSNR','value':1000000,'comment':'Mean SNR'},
+                ]
 
-            cols = [d.ll,d.de,d.we,sp.ones(d.ll.size)]
-            names = ['LOGLAM','DELTA','WEIGHT','CONT']
-            out.write(cols,names=names,header=hd,extname=str(d.thid))
+                dll = (d.ll[-1]-d.ll[0])/float(len(d.ll)-1)
+                hd += [{'name':'DLL','value':dll,'comment':'Loglam bin size [log Angstrom]'}]
+                diff = d.diff
+                if diff is None:
+                    diff = d.ll*0
+
+                cols=[d.ll,d.de,d.iv,diff]
+                names=['LOGLAM','DELTA','IVAR','DIFF']
+                units=['log Angstrom','','','']
+                comments = ['Log lambda','Delta field','Inverse variance','Difference']
+            else :
+
+                cols = [d.ll,d.de,d.we,sp.ones(d.ll.size)]
+                names = ['LOGLAM','DELTA','WEIGHT','CONT']
+                units=['log Angstrom','','','']
+                comments = ['Log lambda','Delta field','Pixel weights','Continuum']
+                out.write(cols,names=names,header=hd,extname=str(d.thid))
+
+
         out.close()
 
     print("")
