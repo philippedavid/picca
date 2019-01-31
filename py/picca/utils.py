@@ -341,7 +341,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     ### Transform transmission to delta and store it
     for nf, p in enumerate(sorted(list(deltas.keys()))):
         print("\rwrite {} of {} ".format(nf,len(list(deltas.keys()))), end="")
-        out = fitsio.FITS(outdir+'/delta-{}'.format(p)+'.fits.gz','rw',clobber=True)
+        out = fitsio.FITS(outdir+'/delta-{}'.format(p)+'.fits','rw',clobber=True)
         for d in deltas[p]:
             bins = sp.floor((d.ll-lmin)/dll+0.5).astype(int)
             d.de = d.de/T_stack[bins] - 1.
