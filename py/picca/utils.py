@@ -369,7 +369,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
                     diff = d.ll*0
                 iv=d.iv
                 if iv is None:
-                    iv = np.ones(d.ll.size)*1e12
+                    iv = sp.ones(d.ll.size)*1e12
                 cols=[d.ll,d.de,iv,diff]
                 names=['LOGLAM','DELTA','IVAR','DIFF']
                 units=['log Angstrom','','','']
