@@ -216,6 +216,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     """
 
     ### Catalog of objects
+    oldmocks=False
     h = fitsio.FITS(zcat)
     key_val = sp.char.strip(sp.array([ h[1].read_header()[k] for k in h[1].read_header().keys()]).astype(str))
     if 'TARGETID' in key_val:
@@ -223,7 +224,8 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     elif 'THING_ID' in key_val:
         zcat_thid = h[1]['THING_ID'][:]
     elif 'MOCKID' in key_val:
-        zcat_thid = h[1]['MOCKID'][:]
+        zcat_thid = h[1]['MOCKID'][:].astype(sp.float).astype(sp.int) #the conversions enable comparison as the strings are not exactly the same
+        oldmocks=True
     w = h[1]['Z'][:]>max(0.,lObs_min/lRF_max -1.)
     w &= h[1]['Z'][:]<max(0.,lObs_max/lRF_min -1.)
     zcat_ra = h[1]['RA'][:][w].astype('float64')*sp.pi/180.
@@ -263,6 +265,8 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
         print("\rread {} of {} {}".format(nf,fi.size,sp.sum([ len(deltas[p]) for p in list(deltas.keys())])), end="")
         h = fitsio.FITS(f)
         thid = h[1]['MOCKID'][:]
+        if oldmocks:
+            this=this.astype(sp.int)
         if sp.in1d(thid,zcat_thid).sum()==0:
             h.close()
             continue
