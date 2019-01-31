@@ -358,13 +358,12 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
             hd['ORDER'] = d.order
             lam_lya = constants.absorber_IGM["LYA"]
             if pk1d_format:
-                hd += [{'name':'MEANZ','value':sp.mean([10.**ll[len(ll)-1], 10.**ll[0]])/lam_lya -1.0,'comment':'Mean redshift'},
-                       {'name':'MEANRESO','value':1000000,'comment':'Mean resolution'},
-                       {'name':'MEANSNR','value':1000000,'comment':'Mean SNR'},
-                ]
+                hd += {'MEANZ':sp.mean([10.**ll[len(ll)-1], 10.**ll[0]])/lam_lya -1.0,
+                       'MEANRESO':1000000,
+                       'MEANSNR':1000000}
 
                 dll = (d.ll[-1]-d.ll[0])/float(len(d.ll)-1)
-                hd += [{'name':'DLL','value':dll,'comment':'Loglam bin size [log Angstrom]'}]
+                hd += {'DLL':dll}
                 diff = d.diff
                 if diff is None:
                     diff = d.ll*0
