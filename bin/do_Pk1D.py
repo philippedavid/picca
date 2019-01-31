@@ -256,6 +256,8 @@ if __name__ == '__main__':
                         selection = (k>0.003) & (k<0.02)
                     Pk_mean_diff = sum(Pk_diff[selection])/float(len(Pk_diff[selection]))
                     Pk = (Pk_raw - Pk_mean_diff)/cor_reso
+                if (args.noise_estimate=='noiseless'):
+                    Pk = Pk_raw / cor_reso
 
                 # save in root format
                 if (args.out_format=='root'):
