@@ -5,6 +5,8 @@ import sys
 import fitsio
 import glob
 import healpy
+from picca import constants
+
 
 try:
     import __builtin__
