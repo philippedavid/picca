@@ -368,7 +368,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
                 if diff is None:
                     diff = d.ll*0
 
-                cols=[d.ll,d.de,d.iv,diff]
+                cols=[d.ll,d.de,d.iv,sp.zeros(d.ll.size)]
                 names=['LOGLAM','DELTA','IVAR','DIFF']
                 units=['log Angstrom','','','']
                 comments = ['Log lambda','Delta field','Inverse variance','Difference']
@@ -378,7 +378,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
                 names = ['LOGLAM','DELTA','WEIGHT','CONT']
                 units=['log Angstrom','','','']
                 comments = ['Log lambda','Delta field','Pixel weights','Continuum']
-            out.write(cols,names=names,header=hd,extname=str(d.thid))
+            out.write(cols,names=names,header=hd,units=units,extname=str(d.thid))
 
 
         out.close()
