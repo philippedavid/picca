@@ -224,7 +224,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
     elif 'THING_ID' in key_val:
         zcat_thid = h[1]['THING_ID'][:]
     elif 'MOCKID' in key_val:
-        zcat_thid = h[1]['MOCKID'][:].astype(sp.float).astype(sp.int) #the conversions enable comparison as the strings are not exactly the same
+        zcat_thid = h[1]['MOCKID'][:].astype(float).astype(int) #the conversions enable comparison as the strings are not exactly the same
         oldmocks=True
     w = h[1]['Z'][:]>max(0.,lObs_min/lRF_max -1.)
     w &= h[1]['Z'][:]<max(0.,lObs_max/lRF_min -1.)
@@ -266,7 +266,7 @@ def desi_convert_transmission_to_delta_files(zcat,outdir,indir=None,infiles=None
         h = fitsio.FITS(f)
         thid = h[1]['MOCKID'][:]
         if oldmocks:
-            this=this.astype(sp.int)
+            thid=thid.astype(int)
         if sp.in1d(thid,zcat_thid).sum()==0:
             h.close()
             continue
