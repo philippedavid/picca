@@ -257,7 +257,7 @@ class forest(qso):
         if self.T_dla is None:
             self.T_dla = sp.ones(len(self.ll))
 
-        self.T_dla *= dla(self,zabs,nhi).t
+        self.T_dla *= dla.dla(self,zabs,nhi).t
 
         w = (self.T_dla>forest.dla_mask)
         if not mask is None:
